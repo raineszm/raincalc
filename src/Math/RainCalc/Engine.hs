@@ -5,12 +5,15 @@ module Math.RainCalc.Engine where
 	import qualified Math.RainCalc.Operator as Op
 	import qualified Math.RainCalc.Numbers as N
 	import qualified Math.RainCalc.Command as Cmd
+	import qualified Math.RainCalc.Modifier as Mod
 
 	processLine :: S.State -> String -> IO S.State
-	processLine state line = foldM processToken state $ words line
+	processLine state line = (foldM processToken state $ words line) >>= Mod.cleanupModifiers
 
 	processToken :: S.State -> String -> IO S.State
 	processToken state tok
+		| Mod.activeModifier state = Mod.triggerModifier state tok
+		| Mod.isModifier tok = return $ Mod.armModifier state tok
 		| N.isNumber tok = return $ N.handleNumber state tok
 		| Op.isOperator tok = tryOperator state tok
 		| Cmd.isCommand tok = Cmd.handleCommand state tok
