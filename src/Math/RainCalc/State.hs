@@ -23,6 +23,9 @@ module Math.RainCalc.State where
 		,registers_ = Map.empty
 		,modifier_ = Nothing}
 
+	stackSize :: State -> Int
+	stackSize = length . stack_
+
 	smap :: ([Double] -> [Double]) -> State -> State
 	smap f state = state {stack_ = f $ stack_ state}
 
