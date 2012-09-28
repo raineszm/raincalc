@@ -47,22 +47,36 @@ module Math.RainCalc.Operator where
 
 	unaryOperators :: [(String, Operator)]
 	unaryOperators = expandWith (buildOperator 1)
-		[(["sin"], sin . head)
-		,(["cos"], cos . head)
-		,(["tan"], tan . head)
+		[(["sin", "s"], sin . head)
+		,(["cos", "c"], cos . head)
+		,(["tan", "t"], tan . head)
+		,(["sinh", "sh"], sinh . head)
+		,(["cosh", "ch"], cosh . head)
+		,(["tanh", "th"], tanh . head)
 		,(["atan"], atan . head)
 		,(["acos"], acos . head)
 		,(["asin"], asin . head)
 		,(["exp"], exp . head)
 		,(["ln", "log"], log . head)
 		,(["deg", "todegrees"], toDegrees . head)
-		,(["rad", "toradians"], toRadians . head)]
+		,(["rad", "toradians"], toRadians . head)
+		,(["factorial", "fact", "!"], factorial . head)
+		,(["inv", "1/"], (1/) . head)
+		,(["neg"], negate . head)
+		,(["signum", "sgn", "sign"], signum . head)
+		,(["abs", "||"], abs . head)]
 
 	toDegrees :: Double -> Double
 	toDegrees = (180*) . (/pi)
 
 	toRadians :: Double -> Double
 	toRadians = (pi*) . (/180)
+
+	factorial :: Double -> Double
+	factorial 0 = 1
+	factorial n
+		| n < 0 = 0
+		| otherwise = fromIntegral $ foldr1 (*) [1..(round n)]
 
 
 	constants :: [(String, Operator)]

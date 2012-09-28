@@ -28,9 +28,9 @@ module Math.RainCalc.Modifier where
 	unaryHelpAction :: State -> InputT IO State
 	unaryHelpAction state = do
 		outputStrLn "Available Commands: "
-		outputStrLn $ wrapLine 70 $ combine $ Map.keys operators
-		outputStrLn $ wrapLine 70 $ combine $ Map.keys commands
-		outputStrLn $ wrapLine 70 $ combine $ Map.keys modifiers
+		outputStrLn $ wrapLine 60 $ combine $ Map.keys operators
+		outputStrLn $ wrapLine 60 $ combine $ Map.keys commands
+		outputStrLn $ wrapLine 60 $ combine $ Map.keys modifiers
 		return state
 
 		where

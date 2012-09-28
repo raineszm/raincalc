@@ -1,6 +1,7 @@
 module Math.RainCalc.Engine where
 	import Control.Monad (foldM, liftM)
-	import System.Console.Haskeline (InputT, getInputLine)
+	import System.Console.Haskeline (InputT, getInputLine, outputStrLn)
+	import Data.Char (toLower)
 
 	import qualified Math.RainCalc.State as S
 	import qualified Math.RainCalc.Operator as Op
@@ -14,12 +15,12 @@ module Math.RainCalc.Engine where
 		case line of 
 			Nothing -> return state
 			(Just jline) -> do
-				newState <- processLine state jline
+				newState <- processLine state $ map toLower jline
 				mainLoop newState
 
 
 	prompt :: S.State -> String
-	prompt state = "raincalc[s:" ++ size ++ "] "
+	prompt state = "raincalc[s:" ++ size ++ "]> "
 		where
 			size = show $ S.stackSize state
 
@@ -34,4 +35,6 @@ module Math.RainCalc.Engine where
 		| Op.isOperator tok = return $ Op.handleOperator state tok
 		| Cmd.isCommand tok = Cmd.handleCommand state tok
 		| N.isNumber tok = return $ N.handleNumber state tok
-		| otherwise = return state
+		| otherwise = do
+			outputStrLn $ "Unrecognized sequence \"" ++ tok ++  "\""
+			return state
