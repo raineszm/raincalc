@@ -1,6 +1,6 @@
 module Math.RainCalc.Engine where
 	import Control.Monad (foldM, liftM)
-	import System.IO (hFlush, stdout)
+	import System.Console.Haskeline (InputT, getInputLine)
 
 	import qualified Math.RainCalc.State as S
 	import qualified Math.RainCalc.Operator as Op
@@ -8,25 +8,26 @@ module Math.RainCalc.Engine where
 	import qualified Math.RainCalc.Command as Cmd
 	import qualified Math.RainCalc.Modifier as Mod
 
-	mainLoop :: S.State -> IO S.State
+	mainLoop :: S.State -> InputT IO S.State
 	mainLoop state = do
-		putPrompt state
-		hFlush stdout
-		line <- getLine
-		newState <- processLine state line
-		mainLoop newState
+		line <- getInputLine $ prompt state
+		case line of 
+			Nothing -> return state
+			(Just jline) -> do
+				newState <- processLine state jline
+				mainLoop newState
 
 
-	putPrompt :: S.State -> IO ()
-	putPrompt state = putStr $ "raincalc[s:" ++ size ++ "] "
+	prompt :: S.State -> String
+	prompt state = "raincalc[s:" ++ size ++ "] "
 		where
 			size = show $ S.stackSize state
 
 
-	processLine :: S.State -> String -> IO S.State
+	processLine :: S.State -> String -> InputT IO S.State
 	processLine state line = (foldM processToken state $ words line) >>= Mod.cleanupModifiers
 
-	processToken :: S.State -> String -> IO S.State
+	processToken :: S.State -> String -> InputT IO S.State
 	processToken state tok
 		| Mod.activeModifier state = Mod.triggerModifier state tok
 		| Mod.isModifier tok = return $ Mod.armModifier state tok

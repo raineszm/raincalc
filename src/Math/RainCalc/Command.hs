@@ -1,13 +1,15 @@
 module Math.RainCalc.Command where
 	import qualified Data.Map as Map
 	import System.Exit (exitSuccess)
+	import System.Console.Haskeline (InputT, outputStrLn, outputStr)
+	import Control.Monad.Trans.Class (lift)
 
 	import Math.RainCalc.State (State, pop)
 	import Math.RainCalc.Utils
 	import Math.RainCalc.Classes
 
 	data Command = Command
-		{action_ :: State -> IO State
+		{action_ :: State -> InputT IO State
 		,help_ :: String}
 
 	instance Documented Command where
@@ -19,9 +21,9 @@ module Math.RainCalc.Command where
 		{action_ = printStackAction
 		,help_ = "Prints the stack to the screen."}
 
-	printStackAction :: State -> IO State
+	printStackAction :: State -> InputT IO State
 	printStackAction state = do
-		print state
+		outputStr $ show state
 		return state
 
 	popStack :: Command
@@ -29,9 +31,9 @@ module Math.RainCalc.Command where
 		{action_ = popStackAction
 		,help_ = "Pops and presents the top of the stack."}
 
-	popStackAction :: State -> IO State
+	popStackAction :: State -> InputT IO State
 	popStackAction state = do
-			putStrLn top
+			outputStrLn top
 			return newState
 		where
 			top = case popped of
@@ -41,7 +43,7 @@ module Math.RainCalc.Command where
 
 	quitCommand :: Command
 	quitCommand = Command
-		{action_ = \_ -> exitSuccess
+		{action_ = \_ -> lift $ exitSuccess
 		,help_ = "Quits the program."}
 
 	commands :: Map.Map String Command
@@ -53,7 +55,7 @@ module Math.RainCalc.Command where
 	isCommand :: String -> Bool
 	isCommand tok = Map.member tok commands
 
-	handleCommand :: State -> String -> IO State
+	handleCommand :: State -> String -> InputT IO State
 	handleCommand state tok = (action_ foundCmd) state
 		where
 			(Just foundCmd) = Map.lookup tok commands
