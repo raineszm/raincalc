@@ -4,10 +4,14 @@ module Math.RainCalc.Command where
 
 	import Math.RainCalc.State (State, pop)
 	import Math.RainCalc.Utils
+	import Math.RainCalc.Classes
 
 	data Command = Command
 		{action_ :: State -> IO State
 		,help_ :: String}
+
+	instance Documented Command where
+		getHelp = help_
 
 
 	printStack :: Command

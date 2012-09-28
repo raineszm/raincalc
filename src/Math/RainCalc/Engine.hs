@@ -30,17 +30,7 @@ module Math.RainCalc.Engine where
 	processToken state tok
 		| Mod.activeModifier state = Mod.triggerModifier state tok
 		| Mod.isModifier tok = return $ Mod.armModifier state tok
-		| Op.isOperator tok = tryOperator state tok
+		| Op.isOperator tok = return $ Op.handleOperator state tok
 		| Cmd.isCommand tok = Cmd.handleCommand state tok
 		| N.isNumber tok = return $ N.handleNumber state tok
 		| otherwise = return state
-
-	tryOperator :: S.State -> String -> IO S.State
-	tryOperator state tok = case result of
-		(Left msg) -> do
-			putStrLn msg
-			return state
-		(Right newState) -> return newState
-		where
-			result = Op.handleOperator state tok
-

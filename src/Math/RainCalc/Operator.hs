@@ -4,11 +4,15 @@ module Math.RainCalc.Operator where
 
 	import Math.RainCalc.State (State, pop, push)
 	import Math.RainCalc.Utils (expandWith)
+	import Math.RainCalc.Classes
 
 	data Operator = Operator
 		{arity_ :: Int
 		,action_ :: ([Double] -> Double)
 		,help_ :: String}
+
+	instance Documented Operator where
+		getHelp = help_
 
 	binaryOperator :: [String] -> (Double -> Double -> Double) -> Operator
 	binaryOperator names f = Operator 
@@ -62,15 +66,17 @@ module Math.RainCalc.Operator where
 	isOperator name = Map.member name operators
 
 	evalOperator :: State -> Operator -> State
-	evalOperator state op = newState
+	evalOperator state op = if numArgs < arity then state else newState
 		where
 			newState = push poppedState newValue
 			newValue = (action_ op) args
-			(args, poppedState) = pop state (arity_ op)
+			numArgs = length args
+			(args, poppedState) = pop state arity
+			arity = arity_ op
 
-	handleOperator :: State -> String -> Either String State
+	handleOperator :: State -> String -> State
 	handleOperator state opName = doOperator state foundOp
 		where
-			doOperator _ Nothing = Left $ "Operator " ++ opName ++ " not found."
-			doOperator state (Just op) = Right $ evalOperator state op
+			doOperator _ Nothing = error ("Operator " ++ opName ++ " not found.")
+			doOperator state (Just op) = evalOperator state op
 			foundOp = Map.lookup opName operators

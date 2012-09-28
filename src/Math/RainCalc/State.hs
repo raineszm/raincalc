@@ -34,7 +34,10 @@ module Math.RainCalc.State where
 
 	-- Get the n topmost numbers
 	pop :: State -> Int -> ([Double], State)
-	pop state n = (take n stack,
+	pop state n = (popped,
 	               state {stack_ = drop n stack})
 		where
 			stack = stack_ state
+			popped = case stack of
+				[] -> []
+				_ -> take n stack
