@@ -41,3 +41,20 @@ module Math.RainCalc.State where
 			popped = case stack of
 				[] -> []
 				_ -> take n stack
+
+	dup :: State -> State
+	dup state = state { stack_ = newStk }
+		where
+			newStk = case oldStk of
+				[] -> oldStk
+				stk@(x:xs) -> x:stk
+			oldStk = stack_ state
+
+
+	swap :: State -> State
+	swap state = state {stack_ = newStk}
+		where
+			newStk = case oldStk of 
+				(x:y:xs) -> y:x:xs
+				_ -> oldStk
+			oldStk = stack_ state

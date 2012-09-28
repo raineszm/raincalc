@@ -49,7 +49,21 @@ module Math.RainCalc.Operator where
 	unaryOperators = expandWith (buildOperator 1)
 		[(["sin"], sin . head)
 		,(["cos"], cos . head)
-		,(["tan"], tan . head)]
+		,(["tan"], tan . head)
+		,(["atan"], atan . head)
+		,(["acos"], acos . head)
+		,(["asin"], asin . head)
+		,(["exp"], exp . head)
+		,(["ln", "log"], log . head)
+		,(["deg", "todegrees"], toDegrees . head)
+		,(["rad", "toradians"], toRadians . head)]
+
+	toDegrees :: Double -> Double
+	toDegrees = (180*) . (/pi)
+
+	toRadians :: Double -> Double
+	toRadians = (pi*) . (/180)
+
 
 	constants :: [(String, Operator)]
 	constants = expandWith (buildOperator 0)

@@ -4,7 +4,7 @@ module Math.RainCalc.Command where
 	import System.Console.Haskeline (InputT, outputStrLn, outputStr)
 	import Control.Monad.Trans.Class (lift)
 
-	import Math.RainCalc.State (State, pop)
+	import Math.RainCalc.State (State, pop, dup, swap)
 	import Math.RainCalc.Utils
 	import Math.RainCalc.Classes
 
@@ -46,11 +46,25 @@ module Math.RainCalc.Command where
 		{action_ = \_ -> lift $ exitSuccess
 		,help_ = "Quits the program."}
 
+	dupCommand :: Command
+	dupCommand = Command
+		{action_ = return . dup
+		,help_ = "[ ... x ] -> [ ... x, x ]"}
+
+	swapCommand :: Command
+	swapCommand = Command
+		{action_ = return . swap
+		,help_ = "[ ... x, y ] -> [ ... y, x ]"}
+
+
+
 	commands :: Map.Map String Command
 	commands = Map.fromList $ expand
 		[([".s"], printStack)
 		,(["."], popStack)
-		,([".q", ".quit"], quitCommand)]
+		,([".q", ".quit", "q", "quit"], quitCommand)
+		,(["dup"], dupCommand)
+		,(["swap"], swapCommand)]
 
 	isCommand :: String -> Bool
 	isCommand tok = Map.member tok commands
