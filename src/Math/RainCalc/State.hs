@@ -29,6 +29,9 @@ module Math.RainCalc.State where
 	smap :: ([Double] -> [Double]) -> State -> State
 	smap f state = state {stack_ = f $ stack_ state}
 
+	rmap :: (Map.Map Char Double -> Map.Map Char Double) -> State -> State
+	rmap f state = state {registers_ = f $ registers_ state}
+
 	push :: State -> Double -> State
 	push state num = smap (num:) state
 
@@ -58,3 +61,6 @@ module Math.RainCalc.State where
 				(x:y:xs) -> y:x:xs
 				_ -> oldStk
 			oldStk = stack_ state
+
+	clear :: State -> State
+	clear state = state { stack_ = [] }

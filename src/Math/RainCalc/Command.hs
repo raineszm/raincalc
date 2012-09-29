@@ -4,7 +4,8 @@ module Math.RainCalc.Command where
 	import System.Console.Haskeline (InputT, outputStrLn, outputStr)
 	import Control.Monad.Trans.Class (lift)
 
-	import Math.RainCalc.State (State, pop, dup, swap)
+	import Math.RainCalc.State (State, pop, dup, swap, clear)
+	import Math.RainCalc.Registers (present)
 	import Math.RainCalc.Utils
 	import Math.RainCalc.Classes
 
@@ -15,7 +16,6 @@ module Math.RainCalc.Command where
 	instance Documented Command where
 		getHelp = help_
 
-
 	printStack :: Command
 	printStack = Command
 		{action_ = printStackAction
@@ -25,6 +25,7 @@ module Math.RainCalc.Command where
 	printStackAction state = do
 		outputStr $ show state
 		return state
+
 
 	popStack :: Command
 	popStack = Command
@@ -56,6 +57,21 @@ module Math.RainCalc.Command where
 		{action_ = return . swap
 		,help_ = "[ ... x, y ] -> [ ... y, x ]"}
 
+	clearCommand :: Command
+	clearCommand = Command
+		{action_ = return . clear
+		,help_ = "[ ... ] -> []"}
+
+	printRegisters :: Command
+	printRegisters = Command
+		{action_ = printRegisterAction
+		,help_ = "Prints the set registers to the screen."}
+
+	printRegisterAction :: State -> InputT IO State
+	printRegisterAction state = do
+		outputStrLn "REGISTERS:\n"
+		outputStr $ present state
+		return state
 
 
 	commands :: Map.Map String Command
@@ -64,7 +80,9 @@ module Math.RainCalc.Command where
 		,(["."], popStack)
 		,([".q", ".quit", "q", "quit"], quitCommand)
 		,(["dup"], dupCommand)
-		,(["swap"], swapCommand)]
+		,(["swap"], swapCommand)
+		,(["clear"], clearCommand)
+		,([".r", ".reg", "registers"], printRegisters)]
 
 	isCommand :: String -> Bool
 	isCommand tok = Map.member tok commands

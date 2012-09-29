@@ -57,6 +57,10 @@ module Math.RainCalc.Operator where
 		,(["acos"], acos . head)
 		,(["asin"], asin . head)
 		,(["exp"], exp . head)
+		,(["atanh"], atanh . head)
+		,(["acosh"], acosh . head)
+		,(["asinh"], asinh . head)
+		,(["exp"], exp . head)
 		,(["ln", "log"], log . head)
 		,(["deg", "todegrees"], toDegrees . head)
 		,(["rad", "toradians"], toRadians . head)
@@ -64,7 +68,8 @@ module Math.RainCalc.Operator where
 		,(["inv", "1/"], (1/) . head)
 		,(["neg"], negate . head)
 		,(["signum", "sgn", "sign"], signum . head)
-		,(["abs", "||"], abs . head)]
+		,(["abs", "||"], abs . head)
+		,(["sqrt", "v"], sqrt . head)]
 
 	toDegrees :: Double -> Double
 	toDegrees = (180*) . (/pi)
@@ -75,7 +80,7 @@ module Math.RainCalc.Operator where
 	factorial :: Double -> Double
 	factorial 0 = 1
 	factorial n
-		| n < 0 = 0
+		| n < 0 = 0/0
 		| otherwise = fromIntegral $ foldr1 (*) [1..(round n)]
 
 
