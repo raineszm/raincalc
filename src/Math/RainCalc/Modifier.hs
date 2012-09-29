@@ -2,7 +2,7 @@ module Math.RainCalc.Modifier where
 	import qualified Data.Map as Map
 	import Data.Maybe (fromMaybe, isJust, fromJust)
 	import Control.Monad (liftM, join)
-	import Data.List (intercalate, stripPrefix)
+	import Data.List (stripPrefix)
 	import System.Console.Haskeline (InputT, outputStrLn)
 	import Numeric (readHex)
 
@@ -30,13 +30,10 @@ module Math.RainCalc.Modifier where
 	unaryHelpAction :: State -> InputT IO State
 	unaryHelpAction state = do
 		outputStrLn "Available Commands: "
-		outputStrLn $ wrapLine 60 $ combine $ Map.keys operators
-		outputStrLn $ wrapLine 60 $ combine $ Map.keys commands
-		outputStrLn $ wrapLine 60 $ combine $ Map.keys modifiers
+		outputStrLn $ wrapLine 60 $ unwords $ Map.keys operators
+		outputStrLn $ wrapLine 60 $ unwords $ Map.keys commands
+		outputStrLn $ wrapLine 60 $ unwords $ Map.keys modifiers
 		return state
-
-		where
-			combine = intercalate " "
 
 	helpAction :: State -> String -> InputT IO State
 	helpAction state cmd = do
@@ -95,7 +92,7 @@ module Math.RainCalc.Modifier where
 		| Reg.isValid c = case popped of 
 			[x] -> return $ Reg.set poppedState c x
 			_ -> do
-				outputStrLn $ "Error: Empty stack"
+				outputStrLn "Error: Empty stack"
 				return state
 		| otherwise = do
 			outputStrLn $ "Invalid register: " ++ [c]
@@ -145,7 +142,7 @@ module Math.RainCalc.Modifier where
 	armModifier state modName = state { modifier_ = Just modName}
 
 	triggerModifier :: State -> String -> InputT IO State
-	triggerModifier state tok = (action_ modifier) cleanedState tok
+	triggerModifier state = action_ modifier cleanedState 
 		where
 			cleanedState = state { modifier_ = Nothing }
 			modifier = fromMaybe throwErr maybeModifier
@@ -158,7 +155,7 @@ module Math.RainCalc.Modifier where
 
 	cleanupModifiers :: State -> InputT IO State
 	cleanupModifiers state = case modifier of
-			(Just aMod) -> (unary_ aMod) cleanedState
+			(Just aMod) -> unary_ aMod cleanedState
 			Nothing -> return state
 		where
 			cleanedState = state { modifier_ = Nothing }

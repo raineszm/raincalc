@@ -17,5 +17,5 @@ module Math.RainCalc.Registers where
 	present :: State.State -> String
 	present = concatMap presentPair . Map.toList . State.registers_
 		where
-			presentPair (k,v) = (show k) ++ ": " ++ (show v) ++ "\n"
+			presentPair (k,v) = show k ++ ": " ++ show v ++ "\n"
 

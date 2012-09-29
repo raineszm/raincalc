@@ -26,7 +26,7 @@ module Math.RainCalc.Engine where
 
 
 	processLine :: S.State -> String -> InputT IO S.State
-	processLine state line = (foldM processToken state $ words line) >>= Mod.cleanupModifiers
+	processLine state line = foldM processToken state (words line) >>= Mod.cleanupModifiers
 
 	processToken :: S.State -> String -> InputT IO S.State
 	processToken state tok

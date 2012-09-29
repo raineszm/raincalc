@@ -44,7 +44,7 @@ module Math.RainCalc.Command where
 
 	quitCommand :: Command
 	quitCommand = Command
-		{action_ = \_ -> lift $ exitSuccess
+		{action_ = \_ -> lift exitSuccess
 		,help_ = "Quits the program."}
 
 	dupCommand :: Command
@@ -88,6 +88,6 @@ module Math.RainCalc.Command where
 	isCommand tok = Map.member tok commands
 
 	handleCommand :: State -> String -> InputT IO State
-	handleCommand state tok = (action_ foundCmd) state
+	handleCommand state tok = action_ foundCmd state
 		where
 			(Just foundCmd) = Map.lookup tok commands

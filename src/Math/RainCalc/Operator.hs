@@ -8,7 +8,7 @@ module Math.RainCalc.Operator where
 
 	data Operator = Operator
 		{arity_ :: Int
-		,action_ :: ([Double] -> Double)
+		,action_ :: [Double] -> Double
 		,help_ :: String}
 
 	instance Documented Operator where
@@ -81,7 +81,7 @@ module Math.RainCalc.Operator where
 	factorial 0 = 1
 	factorial n
 		| n < 0 = 0/0
-		| otherwise = fromIntegral $ foldr1 (*) [1..(round n)]
+		| otherwise = fromIntegral $ product [1..(round n)]
 
 
 	constants :: [(String, Operator)]
@@ -102,7 +102,7 @@ module Math.RainCalc.Operator where
 	evalOperator state op = if numArgs < arity then state else newState
 		where
 			newState = push poppedState newValue
-			newValue = (action_ op) args
+			newValue = action_ op args
 			numArgs = length args
 			(args, poppedState) = pop state arity
 			arity = arity_ op
