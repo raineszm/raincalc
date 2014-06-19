@@ -4,7 +4,7 @@ module Math.RainCalc.Command where
 	import System.Console.Haskeline (InputT, outputStrLn, outputStr)
 	import Control.Monad.Trans.Class (lift)
 
-	import Math.RainCalc.State (State, pop, dup, swap, clear)
+	import Math.RainCalc.State (State, pop, dup, swap, clear, sumStack)
 	import Math.RainCalc.Registers (present)
 	import Math.RainCalc.Utils
 	import Math.RainCalc.Classes
@@ -61,6 +61,11 @@ module Math.RainCalc.Command where
 	clearCommand = Command
 		{action_ = return . clear
 		,help_ = "[ ... ] -> []"}
+
+	sumCommand :: Command
+	sumCommand = Command
+		{action_ = return . sumStack
+		,help_ = "[ ... ] -> [sum(...)]"}
 
 	printRegisters :: Command
 	printRegisters = Command

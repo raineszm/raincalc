@@ -64,3 +64,10 @@ module Math.RainCalc.State where
 
 	clear :: State -> State
 	clear state = state { stack_ = [] }
+
+	sumStack :: State -> State
+	sumStack state = state { stack_ = [sum stk]}
+		where
+			stk = stack_ state
+
+
