@@ -29,8 +29,14 @@ module Math.RainCalc.RPNState where
 		,modifier_ = Nothing
 		,terminate_ = False}
 
-	terminate :: RPNState -> RPNState
-	terminate state' = state' {terminate_ = True}
+	armModifier :: String -> Computation ()
+	armModifier modName = modify $ \state -> state { modifier_ = Just modName}
+
+	disarmModifier :: Computation ()
+	disarmModifier = modify $ \state -> state { modifier_ = Nothing}
+
+	terminate :: Computation ()
+	terminate = modify $ \state -> state {terminate_ = True}
 
 	stackSize :: RPNState -> Int
 	stackSize = length . stack_

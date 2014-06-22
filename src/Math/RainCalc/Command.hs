@@ -38,7 +38,7 @@ module Math.RainCalc.Command where
 
 	quitCommand :: Command
 	quitCommand = Command
-		{action_ = modify terminate >> return ""
+		{action_ = terminate >> return ""
 		,help_ = "Quits the program."}
 
 	dupCommand :: Command
