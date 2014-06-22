@@ -4,11 +4,11 @@ module Math.RainCalc.Registers where
 
 	import qualified Math.RainCalc.RPNState as S
 
-	set :: S.RPNState -> Char -> Double -> S.RPNState
-	set state r val = S.rmap (Map.insert r val) state
+	setR :: Char -> Double -> Computation ()
+	setR r val = modify $ S.rmap (Map.insert r val)
 
-	get :: S.RPNState -> Char -> Maybe Double
-	get state r = Map.lookup r $ S.registers_ state
+	getR :: Char -> Computation Maybe Double
+	getR r = gets $ (Map.lookup r) . S.registers_
 
 	isValid :: Char -> Bool
 	isValid = isAlpha . toLower
