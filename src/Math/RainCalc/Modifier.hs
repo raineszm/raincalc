@@ -6,7 +6,7 @@ module Math.RainCalc.Modifier where
 	import Data.List (stripPrefix)
 	import Numeric (readHex)
 
-	import Math.RainCalc.RPNState (Computation, modifier_, push, pop)
+	import Math.RainCalc.RPNState (Computation, RPNState, modifier_, push, pop)
 	import Math.RainCalc.Operator (operators, isOperator)
 	import Math.RainCalc.Command (commands, isCommand)
 	import Math.RainCalc.Utils
@@ -117,8 +117,8 @@ module Math.RainCalc.Modifier where
 	disarmModifier :: Computation ()
 	disarmModifier = modify $ \state -> state { modifier_ = Nothing}
 
-	activeModifier :: Computation Bool
-	activeModifier = gets $ isJust . modifier_
+	activeModifier :: RPNState -> Bool
+	activeModifier = isJust . modifier_
 
 	triggerModifier :: String -> Computation String
 	triggerModifier tok = do

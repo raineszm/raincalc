@@ -1,5 +1,5 @@
 module Math.RainCalc.Engine where
-	import Control.Monad (foldM, liftM)
+	import Control.Monad (foldM)
 	import Control.Monad.State.Lazy (runState, execState)
 	import System.Console.Haskeline (InputT, getInputLine, outputStrLn)
 	import Data.Char (toLower)
@@ -13,12 +13,13 @@ module Math.RainCalc.Engine where
 	mainLoop :: S.RPNState -> InputT IO S.RPNState
 	mainLoop state = do
 		line <- getInputLine $ prompt state
-		return state
-		--case line of
-		--	Nothing -> return state
-		--	(Just jline) -> do
-		--		newState <- processLine state $ map toLower jline
-		--		mainLoop newState
+		case line of
+			Nothing -> return state
+			(Just jline) -> do
+				newState <- processLine state $ map toLower jline
+				if S.terminate_ state
+					then return state
+					else mainLoop newState
 
 
 	prompt :: S.RPNState -> String
@@ -27,11 +28,11 @@ module Math.RainCalc.Engine where
 			size = show $ S.stackSize state
 
 
-	--processLine :: S.RPNState -> String -> InputT IO S.RPNState
-	--processLine state line = foldM processToken state (words line) >>= Mod.cleanupModifiers
+	processLine :: S.RPNState -> String -> InputT IO S.RPNState
+	processLine state line = do
+		newState <- foldM processToken state (words line)
+		doOutput Mod.cleanupModifiers newState
 
-	--processToken :: String -> InputT IO (S.Computation ())
-	--processToken tok = do
 
 	doOutput :: S.Computation String -> S.RPNState -> InputT IO S.RPNState
 	doOutput comp oldState = do
@@ -42,9 +43,16 @@ module Math.RainCalc.Engine where
 	doComputation :: S.Computation () -> S.RPNState -> InputT IO S.RPNState
 	doComputation comp =  return . (execState comp)
 
+	processToken :: S.RPNState -> String -> InputT IO S.RPNState
+	processToken state tok =
+		if S.terminate_ state
+		then return state
+		else processToken_ state tok
+
 
 	processToken_ :: S.RPNState -> String -> InputT IO S.RPNState
 	processToken_ state tok
+		| Mod.activeModifier state = doOutput (Mod.triggerModifier tok) state
 		| Mod.isModifier tok = doComputation (Mod.armModifier tok) state
 		| Op.isOperator tok = doComputation (Op.handleOperator tok) state
 		| Cmd.isCommand tok = doOutput (Cmd.handleCommand tok) state
