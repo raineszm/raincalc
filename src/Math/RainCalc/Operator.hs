@@ -2,7 +2,7 @@ module Math.RainCalc.Operator where
 	import qualified Data.Map as Map
 	import Data.List (intercalate)
 
-	import Math.RainCalc.RPNState (RPNState, pop, push)
+	import Math.RainCalc.RPNState (Computation, pop, push)
 	import Math.RainCalc.Utils (expandWith)
 	import Math.RainCalc.Classes
 
@@ -98,18 +98,19 @@ module Math.RainCalc.Operator where
 	isOperator :: String -> Bool
 	isOperator name = Map.member name operators
 
-	evalOperator :: RPNState -> Operator -> RPNState
-	evalOperator state op = if numArgs < arity then state else newState
+	evalOperator :: Operator -> Computation ()
+	evalOperator op =
+		do
+			args <- pop arity
+			when numArgs >= arity do
+				push $ action_ op args
 		where
-			newState = push poppedState newValue
-			newValue = action_ op args
 			numArgs = length args
-			(args, poppedState) = pop state arity
 			arity = arity_ op
 
-	handleOperator :: RPNState -> String -> RPNState
-	handleOperator state opName = doOperator state foundOp
+	handleOperator :: String -> Computation ()
+	handleOperator opName = doOperator foundOp
 		where
-			doOperator _ Nothing = error ("Operator " ++ opName ++ " not found.")
-			doOperator state' (Just op) = evalOperator state' op
+			doOperator Nothing = error ("Operator " ++ opName ++ " not found.")
+			doOperator (Just op) = evalOperator op
 			foundOp = Map.lookup opName operators
