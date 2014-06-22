@@ -1,13 +1,14 @@
 module Math.RainCalc.Registers where
+	import Control.Monad.State.Lazy
 	import qualified Data.Map as Map
 	import Data.Char (isAlpha, toLower)
 
 	import qualified Math.RainCalc.RPNState as S
 
-	setR :: Char -> Double -> Computation ()
+	setR :: Char -> Double -> S.Computation ()
 	setR r val = modify $ S.rmap (Map.insert r val)
 
-	getR :: Char -> Computation Maybe Double
+	getR :: Char -> S.Computation (Maybe Double)
 	getR r = gets $ (Map.lookup r) . S.registers_
 
 	isValid :: Char -> Bool

@@ -1,4 +1,5 @@
 module Math.RainCalc.Operator where
+	import Control.Monad (unless)
 	import qualified Data.Map as Map
 	import Data.List (intercalate)
 
@@ -102,10 +103,9 @@ module Math.RainCalc.Operator where
 	evalOperator op =
 		do
 			args <- pop arity
-			when numArgs >= arity do
-				push $ action_ op args
+			unless (length args < arity)
+				(push $ action_ op args)
 		where
-			numArgs = length args
 			arity = arity_ op
 
 	handleOperator :: String -> Computation ()
