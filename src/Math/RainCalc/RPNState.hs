@@ -30,7 +30,7 @@ module Math.RainCalc.RPNState where
 		,terminate_ = False}
 
 	terminate :: Computation ()
-	terminate = modify $ \state -> state {terminate_ = True}
+	terminate = modify $ \state' -> state' {terminate_ = True}
 
 	shouldQuit :: Computation Bool
 	shouldQuit = gets terminate_
@@ -39,10 +39,10 @@ module Math.RainCalc.RPNState where
 	stackSize = length . stack_
 
 	smap :: ([Double] -> [Double]) -> RPNState -> RPNState
-	smap f state = state {stack_ = f $ stack_ state}
+	smap f state' = state' {stack_ = f $ stack_ state'}
 
 	rmap :: (Map.Map Char Double -> Map.Map Char Double) -> RPNState -> RPNState
-	rmap f state = state {registers_ = f $ registers_ state}
+	rmap f state' = state' {registers_ = f $ registers_ state'}
 
 	push :: Double -> Computation ()
 	push num = modify $ push_ num

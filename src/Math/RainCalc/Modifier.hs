@@ -1,7 +1,7 @@
 module Math.RainCalc.Modifier where
 	import qualified Data.Map as Map
 	import Data.Maybe (fromMaybe, isJust, fromJust, isNothing)
-	import Control.Monad (liftM, join, (>=>))
+	import Control.Monad ((>=>))
 	import Control.Monad.State.Lazy (gets, modify)
 	import Data.List (stripPrefix)
 	import Numeric (readHex)

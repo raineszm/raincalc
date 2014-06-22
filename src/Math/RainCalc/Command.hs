@@ -1,7 +1,6 @@
 module Math.RainCalc.Command where
 	import qualified Data.Map as Map
 	import Control.Monad.State.Lazy
-	import Control.Monad.Trans.Class (lift)
 
 	import Math.RainCalc.RPNState (Computation,
 		pop, dup, swap, clear, sumStack, displayState, terminate)
