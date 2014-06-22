@@ -32,6 +32,9 @@ module Math.RainCalc.RPNState where
 	terminate :: Computation ()
 	terminate = modify $ \state -> state {terminate_ = True}
 
+	shouldQuit :: Computation Bool
+	shouldQuit = gets terminate_
+
 	stackSize :: RPNState -> Int
 	stackSize = length . stack_
 
