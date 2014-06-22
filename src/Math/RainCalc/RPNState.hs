@@ -29,12 +29,6 @@ module Math.RainCalc.RPNState where
 		,modifier_ = Nothing
 		,terminate_ = False}
 
-	armModifier :: String -> Computation ()
-	armModifier modName = modify $ \state -> state { modifier_ = Just modName}
-
-	disarmModifier :: Computation ()
-	disarmModifier = modify $ \state -> state { modifier_ = Nothing}
-
 	terminate :: Computation ()
 	terminate = modify $ \state -> state {terminate_ = True}
 
