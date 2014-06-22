@@ -11,15 +11,16 @@ module Math.RainCalc.Engine where
 	import qualified Math.RainCalc.Modifier as Mod
 
 	mainLoop :: S.RPNState -> InputT IO S.RPNState
-	mainLoop state = do
-		line <- getInputLine $ prompt state
-		case line of
-			Nothing -> return state
-			(Just jline) -> do
-				newState <- processLine state $ map toLower jline
-				if S.terminate_ state
-					then return state
-					else mainLoop newState
+	mainLoop state =
+		if S.terminate_ state
+			then return state
+			else do
+				line <- getInputLine $ prompt state
+				case line of
+					Nothing -> return state
+					(Just jline) -> do
+						newState <- processLine state $ map toLower jline
+						mainLoop newState
 
 
 	prompt :: S.RPNState -> String
