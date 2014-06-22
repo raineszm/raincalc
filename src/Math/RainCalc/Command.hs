@@ -4,13 +4,14 @@ module Math.RainCalc.Command where
 	import System.Console.Haskeline (InputT, outputStrLn, outputStr)
 	import Control.Monad.Trans.Class (lift)
 
-	import Math.RainCalc.State (State, pop, dup, swap, clear, sumStack)
+	import Math.RainCalc.RPNState (RPNState,
+		pop, dup, swap, clear, sumStack, displayState)
 	import Math.RainCalc.Registers (present)
 	import Math.RainCalc.Utils
 	import Math.RainCalc.Classes
 
 	data Command = Command
-		{action_ :: State -> InputT IO State
+		{action_ :: RPNState -> InputT IO RPNState
 		,help_ :: String}
 
 	instance Documented Command where
@@ -21,9 +22,9 @@ module Math.RainCalc.Command where
 		{action_ = printStackAction
 		,help_ = "Prints the stack to the screen."}
 
-	printStackAction :: State -> InputT IO State
+	printStackAction :: RPNState -> InputT IO RPNState
 	printStackAction state = do
-		outputStr $ show state
+		outputStr $ displayState state
 		return state
 
 
@@ -32,7 +33,7 @@ module Math.RainCalc.Command where
 		{action_ = popStackAction
 		,help_ = "Pops and presents the top of the stack."}
 
-	popStackAction :: State -> InputT IO State
+	popStackAction :: RPNState -> InputT IO RPNState
 	popStackAction state = do
 			outputStrLn top
 			return newState
@@ -72,7 +73,7 @@ module Math.RainCalc.Command where
 		{action_ = printRegisterAction
 		,help_ = "Prints the set registers to the screen."}
 
-	printRegisterAction :: State -> InputT IO State
+	printRegisterAction :: RPNState -> InputT IO RPNState
 	printRegisterAction state = do
 		outputStrLn "REGISTERS:\n"
 		outputStr $ present state
@@ -92,7 +93,7 @@ module Math.RainCalc.Command where
 	isCommand :: String -> Bool
 	isCommand tok = Map.member tok commands
 
-	handleCommand :: State -> String -> InputT IO State
+	handleCommand :: RPNState -> String -> InputT IO RPNState
 	handleCommand state tok = action_ foundCmd state
 		where
 			(Just foundCmd) = Map.lookup tok commands

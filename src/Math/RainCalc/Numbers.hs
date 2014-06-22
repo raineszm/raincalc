@@ -1,10 +1,9 @@
 module Math.RainCalc.Numbers where
-	import Data.Char (isHexDigit)
 	import Text.Regex.PCRE
-	
-	import Math.RainCalc.State (State, push)
 
-	handleNumber :: State -> String -> State
+	import Math.RainCalc.RPNState (RPNState, push)
+
+	handleNumber :: RPNState -> String -> RPNState
 	handleNumber state num  = push state $ read num
 
 	numRegex :: String

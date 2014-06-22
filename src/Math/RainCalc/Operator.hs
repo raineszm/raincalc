@@ -2,7 +2,7 @@ module Math.RainCalc.Operator where
 	import qualified Data.Map as Map
 	import Data.List (intercalate)
 
-	import Math.RainCalc.State (State, pop, push)
+	import Math.RainCalc.RPNState (RPNState, pop, push)
 	import Math.RainCalc.Utils (expandWith)
 	import Math.RainCalc.Classes
 
@@ -15,13 +15,13 @@ module Math.RainCalc.Operator where
 		getHelp = help_
 
 	binaryOperator :: [String] -> (Double -> Double -> Double) -> Operator
-	binaryOperator names f = Operator 
+	binaryOperator names f = Operator
 		{arity_ = 2
 		,action_ = action
 		,help_ = help}
 		where
 			action (x:y:[]) = y `f` x
-			help = simpleHelp mainName 2 
+			help = simpleHelp mainName 2
 			mainName = head names
 
 	binaryOperators :: [(String, Operator)]
@@ -40,7 +40,7 @@ module Math.RainCalc.Operator where
 			vars = intercalate ", " $ map (('x':).show) [1..arity]
 
 	buildOperator :: Int -> [String] -> ([Double] -> Double) -> Operator
-	buildOperator arity names f = Operator 
+	buildOperator arity names f = Operator
 		{arity_ = arity
 		,action_ = f
 		,help_ = simpleHelp (head names) arity}
@@ -81,7 +81,7 @@ module Math.RainCalc.Operator where
 	factorial 0 = 1
 	factorial n
 		| n < 0 = 0/0
-		| otherwise = fromIntegral $ product [1..(round n)]
+		| otherwise = fromIntegral $ product [1..(round n :: Integer)]
 
 
 	constants :: [(String, Operator)]
@@ -98,7 +98,7 @@ module Math.RainCalc.Operator where
 	isOperator :: String -> Bool
 	isOperator name = Map.member name operators
 
-	evalOperator :: State -> Operator -> State
+	evalOperator :: RPNState -> Operator -> RPNState
 	evalOperator state op = if numArgs < arity then state else newState
 		where
 			newState = push poppedState newValue
@@ -107,9 +107,9 @@ module Math.RainCalc.Operator where
 			(args, poppedState) = pop state arity
 			arity = arity_ op
 
-	handleOperator :: State -> String -> State
+	handleOperator :: RPNState -> String -> RPNState
 	handleOperator state opName = doOperator state foundOp
 		where
 			doOperator _ Nothing = error ("Operator " ++ opName ++ " not found.")
-			doOperator state (Just op) = evalOperator state op
+			doOperator state' (Just op) = evalOperator state' op
 			foundOp = Map.lookup opName operators

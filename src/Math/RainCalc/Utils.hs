@@ -1,9 +1,8 @@
-module Math.RainCalc.Utils 
+module Math.RainCalc.Utils
 	(expandWith
 	,expand
 	,wrapLine)
 	where
-	import Data.List (concatMap)
 
 	expandWith :: ([String] -> a -> b) -> [([String], a)] -> [(String, b)]
 	expandWith f = concatMap alias
@@ -11,7 +10,7 @@ module Math.RainCalc.Utils
 			alias (names, x) = map (,f names x) names
 
 	expand :: [([String], a)] -> [(String, a)]
-	expand = expandWith (\_ -> id) 
+	expand = expandWith (\_ -> id)
 
 	wrapLine :: Int -> String -> String
 	wrapLine n text = doWrap n ("", words text)

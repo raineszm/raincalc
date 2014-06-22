@@ -1,21 +1,20 @@
 module Math.RainCalc.Registers where
 	import qualified Data.Map as Map
 	import Data.Char (isAlpha, toLower)
-	import Data.Maybe (fromMaybe)
 
-	import qualified Math.RainCalc.State as State
+	import qualified Math.RainCalc.RPNState as S
 
-	set :: State.State -> Char -> Double -> State.State
-	set state r val = State.rmap (Map.insert r val) state
+	set :: S.RPNState -> Char -> Double -> S.RPNState
+	set state r val = S.rmap (Map.insert r val) state
 
-	get :: State.State -> Char -> Maybe Double
-	get state r = Map.lookup r $ State.registers_ state
+	get :: S.RPNState -> Char -> Maybe Double
+	get state r = Map.lookup r $ S.registers_ state
 
 	isValid :: Char -> Bool
 	isValid = isAlpha . toLower
 
-	present :: State.State -> String
-	present = concatMap presentPair . Map.toList . State.registers_
+	present :: S.RPNState -> String
+	present = concatMap presentPair . Map.toList . S.registers_
 		where
 			presentPair (k,v) = show k ++ ": " ++ show v ++ "\n"
 

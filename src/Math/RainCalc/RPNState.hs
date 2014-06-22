@@ -1,7 +1,7 @@
-module Math.RainCalc.State where
+module Math.RainCalc.RPNState where
 	import qualified Data.Map as Map
 
-	data State = State
+	data RPNState = RPNState
 		{stack_ :: [Double]
 		,registers_ :: Map.Map Char Double
 		,modifier_ :: Maybe String }
@@ -14,29 +14,29 @@ module Math.RainCalc.State where
 			formatLine i entry = show i ++ " : " ++ show entry ++ "\n"
 			size = length stack
 
-	instance Show State where
-		show = formatStack . stack_
+	displayState :: RPNState -> String
+	displayState = formatStack . stack_
 
-	emptyState :: State
-	emptyState = State 
+	emptyState :: RPNState
+	emptyState = RPNState
 		{stack_ = []
 		,registers_ = Map.empty
 		,modifier_ = Nothing}
 
-	stackSize :: State -> Int
+	stackSize :: RPNState -> Int
 	stackSize = length . stack_
 
-	smap :: ([Double] -> [Double]) -> State -> State
+	smap :: ([Double] -> [Double]) -> RPNState -> RPNState
 	smap f state = state {stack_ = f $ stack_ state}
 
-	rmap :: (Map.Map Char Double -> Map.Map Char Double) -> State -> State
+	rmap :: (Map.Map Char Double -> Map.Map Char Double) -> RPNState -> RPNState
 	rmap f state = state {registers_ = f $ registers_ state}
 
-	push :: State -> Double -> State
+	push :: RPNState -> Double -> RPNState
 	push state num = smap (num:) state
 
 	-- Get the n topmost numbers
-	pop :: State -> Int -> ([Double], State)
+	pop :: RPNState -> Int -> ([Double], RPNState)
 	pop state n = (popped,
 	               state {stack_ = drop n stack})
 		where
@@ -45,27 +45,27 @@ module Math.RainCalc.State where
 				[] -> []
 				_ -> take n stack
 
-	dup :: State -> State
+	dup :: RPNState -> RPNState
 	dup state = state { stack_ = newStk }
 		where
 			newStk = case oldStk of
 				[] -> oldStk
-				stk@(x:xs) -> x:stk
+				stk@(x:_) -> x:stk
 			oldStk = stack_ state
 
 
-	swap :: State -> State
+	swap :: RPNState -> RPNState
 	swap state = state {stack_ = newStk}
 		where
-			newStk = case oldStk of 
+			newStk = case oldStk of
 				(x:y:xs) -> y:x:xs
 				_ -> oldStk
 			oldStk = stack_ state
 
-	clear :: State -> State
+	clear :: RPNState -> RPNState
 	clear state = state { stack_ = [] }
 
-	sumStack :: State -> State
+	sumStack :: RPNState -> RPNState
 	sumStack state = state { stack_ = [sum stk]}
 		where
 			stk = stack_ state

@@ -6,7 +6,7 @@ module Math.RainCalc.Modifier where
 	import System.Console.Haskeline (InputT, outputStrLn)
 	import Numeric (readHex)
 
-	import Math.RainCalc.State (State, modifier_, push, pop)
+	import Math.RainCalc.RPNState (RPNState, modifier_, push, pop)
 	import Math.RainCalc.Operator (operators, isOperator)
 	import Math.RainCalc.Command (commands, isCommand)
 	import Math.RainCalc.Utils
@@ -14,8 +14,8 @@ module Math.RainCalc.Modifier where
 	import qualified Math.RainCalc.Registers as Reg
 
 	data Modifier = Modifier
-		{action_ :: State -> String -> InputT IO State
-		,unary_ :: State -> InputT IO State
+		{action_ :: RPNState -> String -> InputT IO RPNState
+		,unary_ :: RPNState -> InputT IO RPNState
 		,help_ :: String}
 
 	instance Documented Modifier where
@@ -27,7 +27,7 @@ module Math.RainCalc.Modifier where
 		,unary_ = unaryHelpAction
 		,help_ = "Displays help information"}
 
-	unaryHelpAction :: State -> InputT IO State
+	unaryHelpAction :: RPNState -> InputT IO RPNState
 	unaryHelpAction state = do
 		outputStrLn "Available Commands: "
 		outputStrLn $ wrapLine 60 $ unwords $ Map.keys operators
@@ -35,7 +35,7 @@ module Math.RainCalc.Modifier where
 		outputStrLn $ wrapLine 60 $ unwords $ Map.keys modifiers
 		return state
 
-	helpAction :: State -> String -> InputT IO State
+	helpAction :: RPNState -> String -> InputT IO RPNState
 	helpAction state cmd = do
 		helpAction' cmd
 		return state
@@ -52,7 +52,7 @@ module Math.RainCalc.Modifier where
 		outputStrLn $ "Help for " ++ key ++ ":"
 		outputStrLn $ getHelp obj
 		where
-			obj = fromJust $ Map.lookup key objs 
+			obj = fromJust $ Map.lookup key objs
 
 	hex :: Modifier
 	hex = Modifier
@@ -60,12 +60,12 @@ module Math.RainCalc.Modifier where
 		,unary_ = unaryHexAction
 		,help_ = "Read next input as a hex sequence."}
 
-	unaryHexAction :: State -> InputT IO State
+	unaryHexAction :: RPNState -> InputT IO RPNState
 	unaryHexAction state = do
 		outputStrLn "Invalid use of x:, no number supplied"
 		return state
 
-	hexAction :: State -> String -> InputT IO State
+	hexAction :: RPNState -> String -> InputT IO RPNState
 	hexAction state tok = newState
 		where
 			newState = if null rest
@@ -73,7 +73,7 @@ module Math.RainCalc.Modifier where
 				else do
 					outputStrLn $ "Invalid hex sequence: " ++ tok
 					return state
-			((num, rest):junk) = readHex digits
+			((num, rest):_) = readHex digits
 			digits = fromMaybe tok $ stripPrefix "0x" tok
 
 	toRegister :: Modifier
@@ -82,14 +82,14 @@ module Math.RainCalc.Modifier where
 		,unary_ = unaryRegisterAction
 		,help_ = "Pops the top of the stack to the specified register."}
 
-	unaryRegisterAction :: State -> InputT IO State
+	unaryRegisterAction :: RPNState -> InputT IO RPNState
 	unaryRegisterAction state = do
 		outputStrLn "No register supplied."
 		return state
 
-	toRegisterAction :: State -> String -> InputT IO State
+	toRegisterAction :: RPNState -> String -> InputT IO RPNState
 	toRegisterAction state [c]
-		| Reg.isValid c = case popped of 
+		| Reg.isValid c = case popped of
 			[x] -> return $ Reg.set poppedState c x
 			_ -> do
 				outputStrLn "Error: Empty stack"
@@ -110,7 +110,7 @@ module Math.RainCalc.Modifier where
 		,unary_ = unaryRegisterAction
 		,help_ = "Pushes the value of the specified register to the stack."}
 
-	fromRegisterAction :: State -> String -> InputT IO State
+	fromRegisterAction :: RPNState -> String -> InputT IO RPNState
 	fromRegisterAction state [c]
 		| Reg.isValid c = case fetched of
 			(Just val) -> return $ push state val
@@ -138,22 +138,22 @@ module Math.RainCalc.Modifier where
 		,(["->"], toRegister)
 		,(["<-"], fromRegister)]
 
-	armModifier :: State -> String -> State
+	armModifier :: RPNState -> String -> RPNState
 	armModifier state modName = state { modifier_ = Just modName}
 
-	triggerModifier :: State -> String -> InputT IO State
-	triggerModifier state = action_ modifier cleanedState 
+	triggerModifier :: RPNState -> String -> InputT IO RPNState
+	triggerModifier state = action_ modifier cleanedState
 		where
 			cleanedState = state { modifier_ = Nothing }
 			modifier = fromMaybe throwErr maybeModifier
 			maybeModifier = join $ liftM (`Map.lookup` modifiers) mmod
-			mmod = modifier_ state	
+			mmod = modifier_ state
 			throwErr = error "Somehow a modifier became undefined"
 
-	activeModifier :: State -> Bool
+	activeModifier :: RPNState -> Bool
 	activeModifier = isJust . modifier_
 
-	cleanupModifiers :: State -> InputT IO State
+	cleanupModifiers :: RPNState -> InputT IO RPNState
 	cleanupModifiers state = case modifier of
 			(Just aMod) -> unary_ aMod cleanedState
 			Nothing -> return state
