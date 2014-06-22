@@ -6,7 +6,8 @@ module Math.RainCalc.RPNState where
 	data RPNState = RPNState
 		{stack_ :: [Double]
 		,registers_ :: Map.Map Char Double
-		,modifier_ :: Maybe String }
+		,modifier_ :: Maybe String
+		,terminate_ :: Bool }
 
 	type Computation = StateM.State RPNState
 
@@ -25,7 +26,11 @@ module Math.RainCalc.RPNState where
 	emptyState = RPNState
 		{stack_ = []
 		,registers_ = Map.empty
-		,modifier_ = Nothing}
+		,modifier_ = Nothing
+		,terminate_ = False}
+
+	terminate :: RPNState -> RPNState
+	terminate state' = state' {terminate_ = True}
 
 	stackSize :: RPNState -> Int
 	stackSize = length . stack_
@@ -75,7 +80,7 @@ module Math.RainCalc.RPNState where
 	clear = modify clear_
 
 	clear_ :: RPNState -> RPNState
-	clear_ = smap (\_ -> [])
+	clear_ = smap (const [])
 
 	sumStack :: Computation ()
 	sumStack = modify sumStack_
