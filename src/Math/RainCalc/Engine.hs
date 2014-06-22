@@ -1,7 +1,9 @@
 module Math.RainCalc.Engine where
 	import Control.Monad (foldM)
 	import Control.Monad.State.Lazy (runState, execState)
+	import Control.Monad.Trans.Class (lift)
 	import System.Console.Haskeline (InputT, getInputLine, outputStrLn)
+	import System.Exit (exitSuccess)
 	import Data.Char (toLower)
 
 	import qualified Math.RainCalc.RPNState as S
@@ -11,16 +13,13 @@ module Math.RainCalc.Engine where
 	import qualified Math.RainCalc.Modifier as Mod
 
 	mainLoop :: S.RPNState -> InputT IO S.RPNState
-	mainLoop state =
-		if S.terminate_ state
-			then return state
-			else do
-				line <- getInputLine $ prompt state
-				case line of
-					Nothing -> return state
-					(Just jline) -> do
-						newState <- processLine state $ map toLower jline
-						mainLoop newState
+	mainLoop state = do
+		line <- getInputLine $ prompt state
+		case line of
+			Nothing -> return state
+			(Just jline) -> do
+				newState <- processLine state $ map toLower jline
+				mainLoop newState
 
 
 	prompt :: S.RPNState -> String
@@ -45,10 +44,11 @@ module Math.RainCalc.Engine where
 	doComputation comp =  return . (execState comp)
 
 	processToken :: S.RPNState -> String -> InputT IO S.RPNState
-	processToken state tok =
-		if S.terminate_ state
-		then return state
-		else processToken_ state tok
+	processToken state tok = do
+		newState <- processToken_ state tok
+		if S.terminate_ newState
+			then lift exitSuccess
+			else return newState
 
 
 	processToken_ :: S.RPNState -> String -> InputT IO S.RPNState
