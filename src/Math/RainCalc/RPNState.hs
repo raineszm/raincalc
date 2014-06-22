@@ -1,10 +1,14 @@
 module Math.RainCalc.RPNState where
+	import Control.Monad.State.Lazy as StateM
+
 	import qualified Data.Map as Map
 
 	data RPNState = RPNState
 		{stack_ :: [Double]
 		,registers_ :: Map.Map Char Double
 		,modifier_ :: Maybe String }
+
+	type Computation = StateM.State RPNState
 
 	formatStack :: [Double] -> String
 	formatStack stack = header ++ contents
@@ -32,42 +36,49 @@ module Math.RainCalc.RPNState where
 	rmap :: (Map.Map Char Double -> Map.Map Char Double) -> RPNState -> RPNState
 	rmap f state = state {registers_ = f $ registers_ state}
 
-	push :: RPNState -> Double -> RPNState
-	push state num = smap (num:) state
+	push :: Double -> Computation ()
+	push num = modify $ push_ num
 
-	-- Get the n topmost numbers
-	pop :: RPNState -> Int -> ([Double], RPNState)
-	pop state n = (popped,
-	               state {stack_ = drop n stack})
-		where
-			stack = stack_ state
-			popped = case stack of
-				[] -> []
-				_ -> take n stack
+	push_ :: Double -> RPNState -> RPNState
+	push_ num = smap (num:)
 
-	dup :: RPNState -> RPNState
-	dup state = state { stack_ = newStk }
+	pop :: Int -> Computation [Double]
+	pop n = do
+		stack <- gets stack_
+		modify $ smap (drop n)
+		return $ case stack of
+			[] -> []
+			_ -> take n stack
+
+
+	dup :: Computation ()
+	dup = modify dup_
+
+	dup_ :: RPNState -> RPNState
+	dup_ = smap newStk
 		where
-			newStk = case oldStk of
+			newStk oldStk = case oldStk of
 				[] -> oldStk
 				stk@(x:_) -> x:stk
-			oldStk = stack_ state
 
+	swap :: Computation ()
+	swap = modify swap_
 
-	swap :: RPNState -> RPNState
-	swap state = state {stack_ = newStk}
+	swap_ :: RPNState -> RPNState
+	swap_ = smap newStk
 		where
-			newStk = case oldStk of
+			newStk oldStk = case oldStk of
 				(x:y:xs) -> y:x:xs
 				_ -> oldStk
-			oldStk = stack_ state
 
-	clear :: RPNState -> RPNState
-	clear state = state { stack_ = [] }
+	clear :: Computation ()
+	clear = modify clear_
 
-	sumStack :: RPNState -> RPNState
-	sumStack state = state { stack_ = [sum stk]}
-		where
-			stk = stack_ state
+	clear_ :: RPNState -> RPNState
+	clear_ = smap (\_ -> [])
 
+	sumStack :: Computation ()
+	sumStack = modify sumStack_
 
+	sumStack_ :: RPNState -> RPNState
+	sumStack_ = smap ((:[]) . sum)
