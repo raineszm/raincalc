@@ -9,7 +9,7 @@ module Math.RainCalc.Registers where
 	setR r val = modify $ S.rmap (Map.insert r val)
 
 	getR :: Char -> S.Computation (Maybe Double)
-	getR r = gets $ (Map.lookup r) . S.registers_
+	getR r = gets $ Map.lookup r . S.registers_
 
 	isValid :: Char -> Bool
 	isValid = isAlpha . toLower

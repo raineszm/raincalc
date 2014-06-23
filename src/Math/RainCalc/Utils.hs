@@ -10,7 +10,7 @@ module Math.RainCalc.Utils
 			alias (names, x) = map (,f names x) names
 
 	expand :: [([String], a)] -> [(String, a)]
-	expand = expandWith (\_ -> id)
+	expand = expandWith $ const id
 
 	wrapLine :: Int -> String -> String
 	wrapLine n text = doWrap n ("", words text)

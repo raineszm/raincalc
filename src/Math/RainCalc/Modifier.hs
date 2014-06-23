@@ -35,7 +35,7 @@ module Math.RainCalc.Modifier where
 				,Map.keys commands
 				,Map.keys modifiers]
 			header = "Available Commands: "
-			doWrap = (wrapLine 60) . unwords
+			doWrap = wrapLine 60 . unwords
 
 	helpAction ::String -> Computation String
 	helpAction cmd
@@ -132,6 +132,4 @@ module Math.RainCalc.Modifier where
 	cleanupModifiers = do
 		mmod <- gets $ modifier_ >=> (`Map.lookup` modifiers)
 		disarmModifier
-		if isJust mmod
-			then unary_ $ fromJust mmod
-			else return ""
+		maybe (return "") unary_ mmod

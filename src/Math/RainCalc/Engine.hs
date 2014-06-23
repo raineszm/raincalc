@@ -41,7 +41,7 @@ module Math.RainCalc.Engine where
 		return newState
 
 	doComputation :: S.Computation () -> S.RPNState -> InputT IO S.RPNState
-	doComputation comp =  return . (execState comp)
+	doComputation comp =  return . execState comp
 
 	processToken :: S.RPNState -> String -> InputT IO S.RPNState
 	processToken state tok = do

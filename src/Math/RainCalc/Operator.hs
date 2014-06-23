@@ -87,8 +87,8 @@ module Math.RainCalc.Operator where
 
 	constants :: [(String, Operator)]
 	constants = expandWith (buildOperator 0)
-		[(["e"], \_ -> exp 1),
-		(["pi"], \_ -> pi)]
+		[(["e"], const (exp 1)),
+		(["pi"], const pi)]
 
 	operators :: Map.Map String Operator
 	operators = Map.fromList $ concat
