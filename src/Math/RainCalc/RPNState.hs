@@ -55,7 +55,6 @@ module Math.RainCalc.RPNState where
 			[] -> []
 			_ -> take n stack
 
-
 	dup :: Computation ()
 	dup = modify dup_
 

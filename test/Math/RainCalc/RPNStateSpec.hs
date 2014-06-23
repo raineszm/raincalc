@@ -1,0 +1,28 @@
+module Math.RainCalc.RPNStateSpec (spec) where
+
+  import Test.Hspec
+  import Test.QuickCheck
+  import Math.RainCalc.RPNState
+
+  import Math.RainCalc.TestHelper
+
+  spec :: Spec
+  spec = describe "RPNState" $ do
+  	pushSpec
+  	popSpec
+
+  pushSpec :: Spec
+  pushSpec = describe "push" $ do
+  	it "should add the number to the stack" $ property $
+  		\x -> x `elem` runStack (push x)
+
+  popSpec :: Spec
+  popSpec = describe "push" $ do
+  	it "should return an empty list for an empty stack" $ property $
+  		\n -> runStack (pop n) == []
+  	it "should get the top of the stack" $ property $
+  		\x -> popOne [x] == [x]
+
+  	where
+  		popOne = popN 1
+  		popN n = stack_ . (withStack $ pop n)
