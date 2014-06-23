@@ -15,7 +15,7 @@ module Math.RainCalc.Modifier where
 
 	data Modifier = Modifier
 		{action_ :: String -> Computation String
-		,unary_ :: Computation String
+		,solo_ :: Computation String
 		,help_ :: String}
 
 	instance Documented Modifier where
@@ -24,11 +24,11 @@ module Math.RainCalc.Modifier where
 	help :: Modifier
 	help = Modifier
 		{action_ = helpAction
-		,unary_ = unaryHelpAction
+		,solo_ = soloHelpAction
 		,help_ = "Displays help information"}
 
-	unaryHelpAction :: Computation String
-	unaryHelpAction = (return . unlines) outLines
+	soloHelpAction :: Computation String
+	soloHelpAction = (return . unlines) outLines
 		where
 			outLines = header : map doWrap
 				[Map.keys operators
@@ -52,7 +52,7 @@ module Math.RainCalc.Modifier where
 	hex :: Modifier
 	hex = Modifier
 		{action_ = hexAction
-		,unary_ = return "Invalid use of x:, no number supplied"
+		,solo_ = return "Invalid use of x:, no number supplied"
 		,help_ = "Read next input as a hex sequence."}
 
 	hexAction :: String -> Computation String
@@ -66,11 +66,11 @@ module Math.RainCalc.Modifier where
 	toRegister :: Modifier
 	toRegister = Modifier
 		{action_ = toRegisterAction
-		,unary_ = unaryRegisterAction
+		,solo_ = soloRegisterAction
 		,help_ = "Pops the top of the stack to the specified register."}
 
-	unaryRegisterAction :: Computation String
-	unaryRegisterAction = return "No register supplied."
+	soloRegisterAction :: Computation String
+	soloRegisterAction = return "No register supplied."
 
 	toRegisterAction :: String -> Computation String
 	toRegisterAction [c]
@@ -86,7 +86,7 @@ module Math.RainCalc.Modifier where
 	fromRegister :: Modifier
 	fromRegister = Modifier
 		{action_ = fromRegisterAction
-		,unary_ = unaryRegisterAction
+		,solo_ = soloRegisterAction
 		,help_ = "Pushes the value of the specified register to the stack."}
 
 	fromRegisterAction :: String -> Computation String
@@ -132,4 +132,4 @@ module Math.RainCalc.Modifier where
 	cleanupModifiers = do
 		mmod <- gets $ modifier_ >=> (`Map.lookup` modifiers)
 		disarmModifier
-		maybe (return "") unary_ mmod
+		maybe (return "") solo_ mmod
