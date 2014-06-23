@@ -30,7 +30,8 @@ module Math.RainCalc.Operator where
 		[(["+"], (+))
 		,(["-"], (-))
 		,(["/"], (/))
-		,(["*"], (*))]
+		,(["*"], (*))
+		,(["^", "**"], (**))]
 
 	simpleHelp :: String -> Int -> String
 	simpleHelp name 0 = "[... ] -> [... " ++ name ++ "]"
