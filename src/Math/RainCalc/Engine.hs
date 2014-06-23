@@ -2,7 +2,8 @@ module Math.RainCalc.Engine where
 	import Control.Monad (foldM)
 	import Control.Monad.State.Lazy (runState, execState)
 	import Control.Monad.Trans.Class (lift)
-	import System.Console.Haskeline (InputT, getInputLine, outputStrLn)
+	import System.Console.Haskeline (InputT,
+		getInputLine, outputStrLn, runInputT, defaultSettings)
 	import System.Exit (exitSuccess)
 	import Data.Char (toLower)
 
@@ -11,6 +12,9 @@ module Math.RainCalc.Engine where
 	import qualified Math.RainCalc.Numbers as N
 	import qualified Math.RainCalc.Command as Cmd
 	import qualified Math.RainCalc.Modifier as Mod
+
+	defaultMain :: IO S.RPNState
+	defaultMain = runInputT defaultSettings $ mainLoop S.emptyState
 
 	mainLoop :: S.RPNState -> InputT IO S.RPNState
 	mainLoop state = do
