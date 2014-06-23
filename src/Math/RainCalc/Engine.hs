@@ -1,67 +1,68 @@
 module Math.RainCalc.Engine where
-	import Control.Monad (foldM)
-	import Control.Monad.State.Lazy (runState, execState)
-	import Control.Monad.Trans.Class (lift)
-	import System.Console.Haskeline (InputT,
-		getInputLine, outputStrLn, runInputT, defaultSettings)
-	import System.Exit (exitSuccess)
-	import Data.Char (toLower)
+import           Control.Monad             (foldM)
+import           Control.Monad.State.Lazy  (execState, runState)
+import           Control.Monad.Trans.Class (lift)
+import           Data.Char                 (toLower)
+import           System.Console.Haskeline  (InputT, defaultSettings,
+                                            getInputLine, outputStrLn,
+                                            runInputT)
+import           System.Exit               (exitSuccess)
 
-	import qualified Math.RainCalc.RPNState as S
-	import qualified Math.RainCalc.Operator as Op
-	import qualified Math.RainCalc.Numbers as N
-	import qualified Math.RainCalc.Command as Cmd
-	import qualified Math.RainCalc.Modifier as Mod
+import qualified Math.RainCalc.Command     as Cmd
+import qualified Math.RainCalc.Modifier    as Mod
+import qualified Math.RainCalc.Numbers     as N
+import qualified Math.RainCalc.Operator    as Op
+import qualified Math.RainCalc.RPNState    as S
 
-	defaultMain :: IO S.RPNState
-	defaultMain = runInputT defaultSettings $ mainLoop S.emptyState
+defaultMain :: IO S.RPNState
+defaultMain = runInputT defaultSettings $ mainLoop S.emptyState
 
-	mainLoop :: S.RPNState -> InputT IO S.RPNState
-	mainLoop state = do
-		line <- getInputLine $ prompt state
-		case line of
-			Nothing -> return state
-			(Just jline) -> do
-				newState <- processLine state $ map toLower jline
-				mainLoop newState
-
-
-	prompt :: S.RPNState -> String
-	prompt state = "raincalc[s:" ++ size ++ "]> "
-		where
-			size = show $ S.stackSize state
+mainLoop :: S.RPNState -> InputT IO S.RPNState
+mainLoop state = do
+    line <- getInputLine $ prompt state
+    case line of
+        Nothing -> return state
+        (Just jline) -> do
+            newState <- processLine state $ map toLower jline
+            mainLoop newState
 
 
-	processLine :: S.RPNState -> String -> InputT IO S.RPNState
-	processLine state line = do
-		newState <- foldM processToken state (words line)
-		doOutput Mod.cleanupModifiers newState
+prompt :: S.RPNState -> String
+prompt state = "raincalc[s:" ++ size ++ "]> "
+    where
+        size = show $ S.stackSize state
 
 
-	doOutput :: S.Computation String -> S.RPNState -> InputT IO S.RPNState
-	doOutput comp oldState = do
-		let (out, newState) = runState comp oldState
-		outputStrLn out
-		return newState
-
-	doComputation :: S.Computation () -> S.RPNState -> InputT IO S.RPNState
-	doComputation comp =  return . execState comp
-
-	processToken :: S.RPNState -> String -> InputT IO S.RPNState
-	processToken state tok = do
-		newState <- processToken_ state tok
-		if S.terminate_ newState
-			then lift exitSuccess
-			else return newState
+processLine :: S.RPNState -> String -> InputT IO S.RPNState
+processLine state line = do
+    newState <- foldM processToken state (words line)
+    doOutput Mod.cleanupModifiers newState
 
 
-	processToken_ :: S.RPNState -> String -> InputT IO S.RPNState
-	processToken_ state tok
-		| Mod.activeModifier state = doOutput (Mod.triggerModifier tok) state
-		| Mod.isModifier tok = doComputation (Mod.armModifier tok) state
-		| Op.isOperator tok = doComputation (Op.handleOperator tok) state
-		| Cmd.isCommand tok = doOutput (Cmd.handleCommand tok) state
-		| N.isNumber tok = doComputation (N.handleNumber tok) state
-		| otherwise = do
-			outputStrLn $ "Unrecognized sequence \"" ++ tok ++  "\""
-			return state
+doOutput :: S.Computation String -> S.RPNState -> InputT IO S.RPNState
+doOutput comp oldState = do
+    let (out, newState) = runState comp oldState
+    outputStrLn out
+    return newState
+
+doComputation :: S.Computation () -> S.RPNState -> InputT IO S.RPNState
+doComputation comp =  return . execState comp
+
+processToken :: S.RPNState -> String -> InputT IO S.RPNState
+processToken state tok = do
+    newState <- processToken_ state tok
+    if S.terminate_ newState
+        then lift exitSuccess
+        else return newState
+
+
+processToken_ :: S.RPNState -> String -> InputT IO S.RPNState
+processToken_ state tok
+    | Mod.activeModifier state = doOutput (Mod.triggerModifier tok) state
+    | Mod.isModifier tok = doComputation (Mod.armModifier tok) state
+    | Op.isOperator tok = doComputation (Op.handleOperator tok) state
+    | Cmd.isCommand tok = doOutput (Cmd.handleCommand tok) state
+    | N.isNumber tok = doComputation (N.handleNumber tok) state
+    | otherwise = do
+        outputStrLn $ "Unrecognized sequence \"" ++ tok ++  "\""
+        return state
