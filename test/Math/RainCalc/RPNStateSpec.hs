@@ -25,4 +25,4 @@ module Math.RainCalc.RPNStateSpec (spec) where
 
   	where
   		popOne = popN 1
-  		popN n = stack_ . withStack (pop n)
+  		popN n = withStack (pop n)

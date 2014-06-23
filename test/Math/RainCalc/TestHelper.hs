@@ -11,8 +11,8 @@ module Math.RainCalc.TestHelper where
 	stackToState :: [Double] -> RPNState
 	stackToState stack = emptyState { stack_ = stack }
 
-	withStack :: Computation a -> [Double] -> RPNState
-	withStack c = execState c . stackToState
+	withStack :: Computation a -> [Double] -> a
+	withStack c = evalState c . stackToState
 
 	top :: Computation a -> Double
 	top c = head $ evalState (c >> pop 1) emptyState
