@@ -12,17 +12,17 @@ module Math.RainCalc.RPNStateSpec (spec) where
   	popSpec
 
   pushSpec :: Spec
-  pushSpec = describe "push" $ do
+  pushSpec = describe "push" $
   	it "should add the number to the stack" $ property $
   		\x -> x `elem` runStack (push x)
 
   popSpec :: Spec
   popSpec = describe "push" $ do
   	it "should return an empty list for an empty stack" $ property $
-  		\n -> runStack (pop n) == []
+  		null . runStack . pop
   	it "should get the top of the stack" $ property $
   		\x -> popOne [x] == [x]
 
   	where
   		popOne = popN 1
-  		popN n = stack_ . (withStack $ pop n)
+  		popN n = stack_ . withStack (pop n)

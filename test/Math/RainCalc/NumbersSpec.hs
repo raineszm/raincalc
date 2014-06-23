@@ -14,13 +14,13 @@ module Math.RainCalc.NumbersSpec (spec) where
   isNumberSpec :: Spec
   isNumberSpec = describe "isNumber" $ do
 
-    it "integers are numbers" $ property $
+    it "integers are numbers" $ property
       ((isNumber . show) :: Int -> Bool)
 
-    it "doubles are numbers" $ property $
+    it "doubles are numbers" $ property
       ((isNumber . show) :: Double -> Bool)
 
-    it "should not match non-numbers" $ do
+    it "should not match non-numbers" $
       map isNumber
         ["apple"
         ,"f"
@@ -29,11 +29,11 @@ module Math.RainCalc.NumbersSpec (spec) where
         ,"1.0."
         ,"."
         ,"-."
-        ,".e4"] `shouldSatisfy` not . any id
+        ,".e4"] `shouldSatisfy` not . or
 
 
   handleNumberSpec :: Spec
-  handleNumberSpec = describe "handleNumber" $ do
+  handleNumberSpec = describe "handleNumber" $
 
-    it "should push the number to the stack" $ property $
+    it "should push the number to the stack" $ property
       ((\n -> (top . handleNumber . show) n == n) :: Double -> Bool)
