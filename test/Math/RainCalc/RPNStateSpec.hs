@@ -1,7 +1,7 @@
 module Math.RainCalc.RPNStateSpec (spec) where
 
-import Data.List (isInfixOf)
 import           Control.Applicative
+import           Data.List                (isInfixOf, mapAccumL)
 import           Math.RainCalc.RPNState
 import           Test.Hspec
 import           Test.QuickCheck
@@ -94,6 +94,7 @@ formatSpec = describe "formatStack" $ do
     it "should display each entry with a position" $ property $
         \stk -> (not . null) stk ==>
             let fmted = formatStack stk
-            in all (\i -> fmtEntryMatcher i (stk!!i) fmted) [0..(length stk)-1]
+                matcher i x = (i + 1, fmtEntryMatcher i x fmted)
+            in all id (snd $ mapAccumL matcher 0 stk)
 
 

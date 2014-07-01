@@ -1,6 +1,7 @@
 module Math.RainCalc.RPNState where
 import           Control.Monad.State.Lazy as StateM
 
+import Data.List (mapAccumL)
 import qualified Data.Map                 as Map
 
 data RPNState = RPNState
@@ -16,9 +17,9 @@ formatStack [] = "(EMPTY)"
 formatStack stack = header ++ contents
 	where
 		header = "STACK:\n(TOP)\n"
-		contents = concat [formatLine i entry| (i, entry) <- zip [0..size] stack]
-		formatLine i entry = show i ++ " : " ++ show entry ++ "\n"
-		size = length stack
+		contents = concat . snd $ mapAccumL accum 0 stack
+		accum i x = (i + 1, formatLine i x)
+		formatLine i x = show i ++ " : " ++ show x ++ "\n"
 
 displayState :: RPNState -> String
 displayState = formatStack . stack_
