@@ -5,7 +5,7 @@ import qualified Data.Map                 as Map
 import           Math.RainCalc.Classes
 import           Math.RainCalc.Registers  (present)
 import           Math.RainCalc.RPNState   (Computation, clear, displayState,
-                                           dup, pop, sumStack, swap, terminate)
+                                           dup, pop, swap, terminate)
 import           Math.RainCalc.Utils
 
 data Command = Command
@@ -54,11 +54,6 @@ clearCommand :: Command
 clearCommand = Command
     {action_ = clear >> return ""
     ,help_ = "[ ... ] -> []"}
-
-sumCommand :: Command
-sumCommand = Command
-    {action_ = sumStack >> return ""
-    ,help_ = "[ ... ] -> [sum(...)]"}
 
 printRegisters :: Command
 printRegisters = Command

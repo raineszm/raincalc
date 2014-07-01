@@ -82,9 +82,3 @@ clear = modify clear_
 
 clear_ :: RPNState -> RPNState
 clear_ = smap (const [])
-
-sumStack :: Computation ()
-sumStack = modify sumStack_
-
-sumStack_ :: RPNState -> RPNState
-sumStack_ = smap (return . sum)

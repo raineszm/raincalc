@@ -1,10 +1,11 @@
 module Math.RainCalc.Operator where
 import           Control.Monad          (unless)
+import Control.Monad.State.Lazy (modify)
 import           Data.List              (intercalate)
 import qualified Data.Map               as Map
 
 import           Math.RainCalc.Classes
-import           Math.RainCalc.RPNState (Computation, pop, push)
+import           Math.RainCalc.RPNState (Computation, pop, push, smap)
 import           Math.RainCalc.Utils    (expandWith)
 
 data Operator = Operator
@@ -34,6 +35,7 @@ binaryOperators = expandWith binaryOperator
 	,(["^", "**"], (**))]
 
 simpleHelp :: String -> Int -> String
+simpleHelp name (-1) = "[... ] -> [" ++ name ++ "(...)]"
 simpleHelp name 0 = "[... ] -> [... " ++ name ++ "]"
 simpleHelp name 1 = "[... x] -> [... " ++ name ++ "(x)]"
 simpleHelp name 2 = "[... x, y] -> [... x " ++ name ++ " y]"
@@ -85,6 +87,9 @@ factorial n
 	| n < 0 = 0/0
 	| otherwise = fromIntegral $ product [1..(round n :: Integer)]
 
+foldOperators :: [(String, Operator)]
+foldOperators = expandWith (buildOperator (-1))
+	[(["sum"], sum)]
 
 constants :: [(String, Operator)]
 constants = expandWith (buildOperator 0)
@@ -95,18 +100,21 @@ operators :: Map.Map String Operator
 operators = Map.fromList $ concat
 	[constants
 	,unaryOperators
-	,binaryOperators]
+	,binaryOperators
+	,foldOperators]
 
 isOperator :: String -> Bool
 isOperator name = Map.member name operators
 
 evalOperator :: Operator -> Computation ()
-evalOperator op =
-	do
+evalOperator op
+	| arity >= 0 = do
 		args <- pop arity
 		unless (length args < arity)
-			(push $ action_ op args)
+			(push $ action args)
+	| otherwise = modify $ smap (return . action)
 	where
+		action = action_ op
 		arity = arity_ op
 
 handleOperator :: String -> Computation ()
