@@ -1,9 +1,10 @@
 module Math.RainCalc.RPNStateSpec (spec) where
 
-import           Control.Applicative      ((<$>), (<*>))
+import           Control.Applicative
 import           Math.RainCalc.RPNState
 import           Test.Hspec
 import           Test.QuickCheck
+import           Text.Show.Functions      ()
 
 import           Math.RainCalc.TestHelper
 
@@ -20,16 +21,17 @@ spec = describe "RPNState" $ do
 pushSpec :: Spec
 pushSpec = describe "push" $
     it "should add the number to the stack" $ property $
-        \x -> x `elem` runStack (push x)
+        elem <$> id <*> runStack . push
 
 popSpec :: Spec
 popSpec = describe "push" $ do
     it "should return an empty list for an empty stack" $ property $
         null . runStack . pop
     it "should get the top of the stack" $ property $
-        \x -> popOne [x] == [x]
+        (==) <$> popOne . pure <*> pure
     where
         popOne = popN 1
+        popN :: Int -> [Double] -> [Double]
         popN n = evalWithStack (pop n)
 
 dupSpec :: Spec
@@ -56,8 +58,12 @@ swapSpec = describe "swap" $ do
 
 smapSpec :: Spec
 smapSpec = describe "smap" $ do
-    it "should apply the given function to the stack" $ do
+    it "should allow modification of the stack size" $ do
         stack_ (smap (1:) emptyState) `shouldBe` [1]
+
+    it "should apply the given function to the stack" $ property $
+        \f -> stack_ (smap f emptyState) == f []
+
 
 sumSpec :: Spec
 sumSpec = describe "sumStack" $ do
