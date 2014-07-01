@@ -85,4 +85,4 @@ sumStack :: Computation ()
 sumStack = modify sumStack_
 
 sumStack_ :: RPNState -> RPNState
-sumStack_ = smap ((:[]) . sum)
+sumStack_ = smap (return . sum)

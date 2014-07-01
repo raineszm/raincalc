@@ -1,5 +1,6 @@
 module Math.RainCalc.RPNStateSpec (spec) where
 
+import           Control.Applicative      ((<$>), (<*>))
 import           Math.RainCalc.RPNState
 import           Test.Hspec
 import           Test.QuickCheck
@@ -13,6 +14,8 @@ spec = describe "RPNState" $ do
     smapSpec
     dupSpec
     swapSpec
+    sumSpec
+    clearSpec
 
 pushSpec :: Spec
 pushSpec = describe "push" $
@@ -54,4 +57,17 @@ swapSpec = describe "swap" $ do
 smapSpec :: Spec
 smapSpec = describe "smap" $ do
     it "should apply the given function to the stack" $ do
-        stack_ (smap ((:)1) emptyState) `shouldBe` [1]
+        stack_ (smap (1:) emptyState) `shouldBe` [1]
+
+sumSpec :: Spec
+sumSpec = describe "sumStack" $ do
+    it "should return 0 for the empty stack" $ do
+        runStack sumStack `shouldBe` [0]
+
+    it "should consume the stack and push its sum" $ property $
+        (==) <$> (stack_ . execWithStack sumStack) <*> (return . sum)
+
+clearSpec :: Spec
+clearSpec = describe "clear" $ do
+    it "should always give us an empty stack" $ property $
+        null . stack_ . execWithStack clear
