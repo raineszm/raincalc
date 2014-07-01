@@ -12,6 +12,7 @@ data RPNState = RPNState
 type Computation = StateM.State RPNState
 
 formatStack :: [Double] -> String
+formatStack [] = "(EMPTY)"
 formatStack stack = header ++ contents
 	where
 		header = "STACK:\n(TOP)\n"

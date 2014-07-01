@@ -1,5 +1,6 @@
 module Math.RainCalc.RPNStateSpec (spec) where
 
+import Data.List (isInfixOf)
 import           Control.Applicative
 import           Math.RainCalc.RPNState
 import           Test.Hspec
@@ -17,6 +18,7 @@ spec = describe "RPNState" $ do
     swapSpec
     sumSpec
     clearSpec
+    formatSpec
 
 pushSpec :: Spec
 pushSpec = describe "push" $
@@ -77,3 +79,21 @@ clearSpec :: Spec
 clearSpec = describe "clear" $ do
     it "should always give us an empty stack" $ property $
         null . stack_ . execWithStack clear
+
+fmtEntryMatcher :: Int -> Double -> String -> Bool
+fmtEntryMatcher i x = any ((&&) <$> strInfix i <*> strInfix x) . lines
+    where
+        strInfix :: (Show a) => a -> String -> Bool
+        strInfix = isInfixOf.show
+
+formatSpec :: Spec
+formatSpec = describe "formatStack" $ do
+    it "should display a special message for empty stack" $ do
+        formatStack [] `shouldBe` "(EMPTY)"
+
+    it "should display each entry with a position" $ property $
+        \stk -> (not . null) stk ==>
+            let fmted = formatStack stk
+            in all (\i -> fmtEntryMatcher i (stk!!i) fmted) [0..(length stk)-1]
+
+
