@@ -1,5 +1,5 @@
 module Math.RainCalc.Engine where
-import           Control.Monad             (foldM)
+import           Control.Monad             (foldM, liftM, mapM)
 import           Control.Monad.State.Lazy  (execState, runState)
 import           Control.Monad.Trans.Class (lift)
 import           Data.Char                 (toLower)
@@ -14,8 +14,17 @@ import qualified Math.RainCalc.Numbers     as N
 import qualified Math.RainCalc.Operator    as Op
 import qualified Math.RainCalc.RPNState    as S
 
+version :: String
+version = "0.1.0.0"
+
 defaultMain :: IO S.RPNState
-defaultMain = runInputT defaultSettings $ mainLoop S.emptyState
+defaultMain = runInputT defaultSettings $ do
+    outputStrLn "--------------------------------"
+    outputStrLn $ "raincalc v" ++ version
+    outputStrLn "<math and stuff>"
+    outputStrLn "--------------------------------"
+    outputStrLn ""
+    mainLoop S.emptyState
 
 mainLoop :: S.RPNState -> InputT IO S.RPNState
 mainLoop state = do
@@ -23,9 +32,10 @@ mainLoop state = do
     case line of
         Nothing -> return state
         (Just jline) -> do
-            newState <- processLine state $ map toLower jline
-            mainLoop newState
-
+            newState <- doOutput (processLine $ map toLower jline) state
+            if S.terminate_ newState
+                then return newState
+                else mainLoop newState
 
 prompt :: S.RPNState -> String
 prompt state = "raincalc[s:" ++ size ++ "]> "
@@ -33,10 +43,11 @@ prompt state = "raincalc[s:" ++ size ++ "]> "
         size = show $ S.stackSize state
 
 
-processLine :: S.RPNState -> String -> InputT IO S.RPNState
-processLine state line = do
-    newState <- foldM processToken state (words line)
-    doOutput Mod.cleanupModifiers newState
+processLine :: String -> S.Computation String
+processLine line = do
+    out <- liftM concat $ mapM processToken (words line)
+    out' <- Mod.cleanupModifiers
+    return $ out ++ out'
 
 
 doOutput :: S.Computation String -> S.RPNState -> InputT IO S.RPNState
@@ -45,24 +56,21 @@ doOutput comp oldState = do
     outputStrLn out
     return newState
 
-doComputation :: S.Computation () -> S.RPNState -> InputT IO S.RPNState
-doComputation comp =  return . execState comp
+emptyOutput :: S.Computation () -> S.Computation String
+emptyOutput = (>> return "")
 
-processToken :: S.RPNState -> String -> InputT IO S.RPNState
-processToken state tok = do
-    newState <- processToken_ state tok
-    if S.terminate_ newState
-        then lift exitSuccess
-        else return newState
+processToken :: String -> S.Computation String
+processToken tok = do
+    armed <- Mod.isArmed
+    if armed then
+        Mod.triggerModifier tok
+        else processToken_ tok
 
 
-processToken_ :: S.RPNState -> String -> InputT IO S.RPNState
-processToken_ state tok
-    | Mod.activeModifier state = doOutput (Mod.triggerModifier tok) state
-    | Mod.isModifier tok = doComputation (Mod.armModifier tok) state
-    | Op.isOperator tok = doComputation (Op.handleOperator tok) state
-    | Cmd.isCommand tok = doOutput (Cmd.handleCommand tok) state
-    | N.isNumber tok = doComputation (N.handleNumber tok) state
-    | otherwise = do
-        outputStrLn $ "Unrecognized sequence \"" ++ tok ++  "\""
-        return state
+processToken_ :: String -> S.Computation String
+processToken_ tok
+    | Mod.isModifier tok = emptyOutput $ Mod.armModifier tok
+    | Op.isOperator tok = emptyOutput $ Op.handleOperator tok
+    | Cmd.isCommand tok = Cmd.handleCommand tok
+    | N.isNumber tok = emptyOutput $ N.handleNumber tok
+    | otherwise = return $ "Unrecognized sequence \"" ++ tok ++  "\""

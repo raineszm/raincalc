@@ -122,6 +122,9 @@ disarmModifier = modify $ \state -> state { modifier_ = Nothing}
 activeModifier :: RPNState -> Bool
 activeModifier = isJust . modifier_
 
+isArmed :: Computation Bool
+isArmed = gets activeModifier
+
 triggerModifier :: String -> Computation String
 triggerModifier tok = do
 	mmod <- gets $ modifier_ >=> (`Map.lookup` modifiers)

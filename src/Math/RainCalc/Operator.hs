@@ -89,7 +89,8 @@ factorial n
 
 foldOperators :: [(String, Operator)]
 foldOperators = expandWith (buildOperator (-1))
-	[(["sum"], sum)]
+	[(["sum"], sum)
+	,(["prod"], product)]
 
 constants :: [(String, Operator)]
 constants = expandWith (buildOperator 0)

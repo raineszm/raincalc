@@ -1,7 +1,7 @@
 module Math.RainCalc.RPNState where
 import           Control.Monad.State.Lazy as StateM
 
-import Data.List (mapAccumL)
+import           Data.List                (mapAccumL)
 import qualified Data.Map                 as Map
 
 data RPNState = RPNState
