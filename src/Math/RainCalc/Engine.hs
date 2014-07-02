@@ -26,25 +26,24 @@ defaultMain = runInputT defaultSettings $ do
     outputStrLn ""
     mainLoop S.emptyState
 
-mainLoop :: S.RPNState -> InputT IO S.RPNState
-mainLoop state = do
-    line <- getInputLine $ prompt state
-    case line of
-        Nothing -> return state
-        (Just jline) -> do
-            newState <- doOutput (processLine $ map toLower jline) state
-            if S.terminate_ newState
-                then return newState
-                else mainLoop newState
-
 prompt :: S.RPNState -> String
 prompt state = "raincalc[s:" ++ size ++ "]> "
     where
         size = show $ S.stackSize state
 
+mainLoop :: S.RPNState -> InputT IO S.RPNState
+mainLoop state = getInputLine (prompt state) >>=
+    maybe (return state) (processLine state)
 
-processLine :: String -> S.Computation String
-processLine line = do
+processLine :: S.RPNState -> String -> InputT IO S.RPNState
+processLine state line = do
+        newState <- doOutput (processLine_ $ map toLower line) state
+        if S.terminate_ newState
+            then return newState
+            else mainLoop newState
+
+processLine_ :: String -> S.Computation String
+processLine_ line = do
     out <- liftM concat $ mapM processToken (words line)
     out' <- Mod.cleanupModifiers
     return $ out ++ out'
