@@ -1,4 +1,5 @@
 module Math.RainCalc.Command where
+import Control.Applicative ((<$>))
 import           Control.Monad.State.Lazy
 import qualified Data.Map                 as Map
 
@@ -35,24 +36,27 @@ popStackAction = do
             [] -> "Empty Stack."
             [x] -> show x
 
+silent :: Computation a -> Computation String
+silent = (>>return "")
+
 quitCommand :: Command
 quitCommand = Command
-    {action_ = terminate >> return ""
+    {action_ = silent terminate
     ,help_ = "Quits the program."}
 
 dupCommand :: Command
 dupCommand = Command
-    {action_ = dup >> return ""
+    {action_ = silent dup
     ,help_ = "[ ... x ] -> [ ... x, x ]"}
 
 swapCommand :: Command
 swapCommand = Command
-    {action_ = swap >> return ""
+    {action_ = silent swap
     ,help_ = "[ ... x, y ] -> [ ... y, x ]"}
 
 clearCommand :: Command
 clearCommand = Command
-    {action_ = clear >> return ""
+    {action_ = silent clear
     ,help_ = "[ ... ] -> []"}
 
 printRegisters :: Command
@@ -61,9 +65,7 @@ printRegisters = Command
     ,help_ = "Prints the set registers to the screen."}
 
 printRegisterAction :: Computation String
-printRegisterAction = do
-    presented <- gets present
-    return $ "REGISTERS:\n" ++ presented
+printRegisterAction = ("REGISTERS:\n"++) <$> gets present
 
 commands :: Map.Map String Command
 commands = Map.fromList $ expand
