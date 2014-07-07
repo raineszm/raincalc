@@ -37,7 +37,7 @@ popSpec = describe "push" $ do
 
 dupSpec :: Spec
 dupSpec = describe "dup" $ do
-    it "should be id on the empty stack" $ do
+    it "should be id on the empty stack" $
         runStack dup `shouldSatisfy` null
 
     it "should copy the top element of the stack" $ property $
@@ -48,7 +48,7 @@ dupSpec = describe "dup" $ do
 
 swapSpec :: Spec
 swapSpec = describe "swap" $ do
-    it "should be id on the empty stack" $ do
+    it "should be id on the empty stack" $
         runStack swap `shouldSatisfy` null
 
     it "should swap the two top elements of the stack" $ property $
@@ -59,7 +59,7 @@ swapSpec = describe "swap" $ do
 
 smapSpec :: Spec
 smapSpec = describe "smap" $ do
-    it "should allow modification of the stack size" $ do
+    it "should allow modification of the stack size" $
         stack_ (smap (1:) emptyState) `shouldBe` [1]
 
     it "should apply the given function to the stack" $ property $
@@ -79,13 +79,13 @@ fmtEntryMatcher i x = any ((&&) <$> strInfix i <*> strInfix x) . lines
 
 formatSpec :: Spec
 formatSpec = describe "formatStack" $ do
-    it "should display a special message for empty stack" $ do
+    it "should display a special message for empty stack" $
         formatStack [] `shouldBe` "(EMPTY)"
 
     it "should display each entry with a position" $ property $
         \stk -> (not . null) stk ==>
             let fmted = formatStack stk
                 matcher i x = (i + 1, fmtEntryMatcher i x fmted)
-            in all id (snd $ mapAccumL matcher 0 stk)
+            in and (snd $ mapAccumL matcher 0 stk)
 
 
