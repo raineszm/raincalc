@@ -1,5 +1,5 @@
 module Math.RainCalc.RPNState where
-import           Control.Monad.State.Lazy as StateM
+import           Control.Monad.State.Strict as StateM
 
 import           Data.List                (mapAccumL)
 import qualified Data.Map                 as Map
@@ -44,7 +44,7 @@ rmap :: (Map.Map Char Double -> Map.Map Char Double) -> RPNState -> RPNState
 rmap f state' = state' {registers_ = f $ registers_ state'}
 
 push :: Double -> Computation ()
-push num = modify $ push_ num
+push = modify . push_
 
 push_ :: Double -> RPNState -> RPNState
 push_ num = smap (num:)

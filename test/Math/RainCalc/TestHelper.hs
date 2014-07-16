@@ -1,5 +1,5 @@
 module Math.RainCalc.TestHelper where
-import           Control.Monad.State.Lazy (evalState, execState)
+import           Control.Monad.State.Strict (evalState, execState)
 import           Math.RainCalc.RPNState
 
 run :: Computation a -> RPNState

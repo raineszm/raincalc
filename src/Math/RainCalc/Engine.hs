@@ -1,18 +1,18 @@
 module Math.RainCalc.Engine where
-import           Control.Monad             (foldM, liftM, mapM)
-import           Control.Monad.State.Lazy  (execState, runState)
-import           Control.Monad.Trans.Class (lift)
-import           Data.Char                 (toLower)
-import           System.Console.Haskeline  (InputT, defaultSettings,
-                                            getInputLine, outputStrLn,
-                                            runInputT)
-import           System.Exit               (exitSuccess)
+import           Control.Monad              (foldM, liftM, mapM)
+import           Control.Monad.State.Strict (execState, runState)
+import           Control.Monad.Trans.Class  (lift)
+import           Data.Char                  (toLower)
+import           System.Console.Haskeline   (InputT, defaultSettings,
+                                             getInputLine, outputStrLn,
+                                             runInputT)
+import           System.Exit                (exitSuccess)
 
-import qualified Math.RainCalc.Command     as Cmd
-import qualified Math.RainCalc.Modifier    as Mod
-import qualified Math.RainCalc.Numbers     as N
-import qualified Math.RainCalc.Operator    as Op
-import qualified Math.RainCalc.RPNState    as S
+import qualified Math.RainCalc.Command      as Cmd
+import qualified Math.RainCalc.Modifier     as Mod
+import qualified Math.RainCalc.Numbers      as N
+import qualified Math.RainCalc.Operator     as Op
+import qualified Math.RainCalc.RPNState     as S
 
 version :: String
 version = "0.1.0.0"
