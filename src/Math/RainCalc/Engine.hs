@@ -1,12 +1,10 @@
 module Math.RainCalc.Engine where
-import           Control.Monad              (foldM, liftM, mapM)
-import           Control.Monad.State.Strict (execState, runState)
-import           Control.Monad.Trans.Class  (lift)
+import           Control.Monad              (liftM, liftM2)
+import           Control.Monad.State.Strict (runState)
 import           Data.Char                  (toLower)
 import           System.Console.Haskeline   (InputT, defaultSettings,
                                              getInputLine, outputStrLn,
                                              runInputT)
-import           System.Exit                (exitSuccess)
 
 import qualified Math.RainCalc.Command      as Cmd
 import qualified Math.RainCalc.Modifier     as Mod
@@ -43,10 +41,9 @@ processLine state line = do
             else mainLoop newState
 
 processLine_ :: String -> S.Computation String
-processLine_ line = do
-    out <- liftM concat $ mapM processToken (words line)
-    out' <- Mod.cleanupModifiers
-    return $ out ++ out'
+processLine_ line = liftM2 (++)
+    (liftM concat $ mapM processToken (words line))
+    Mod.cleanupModifiers
 
 
 doOutput :: S.Computation String -> S.RPNState -> InputT IO S.RPNState

@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 module Math.RainCalc.RPNState where
 import           Control.Monad.State.Strict as StateM
 
@@ -17,7 +18,7 @@ formatStack [] = "(EMPTY)"
 formatStack stack = header ++ contents
 	where
 		header = "STACK:\n(TOP)\n"
-		contents = concat . snd $ mapAccumL accum 0 stack
+		contents = concat . snd $ mapAccumL accum (0 :: Int) stack
 		accum i x = (i + 1, formatLine i x)
 		formatLine i x = show i ++ " : " ++ show x ++ "\n"
 
@@ -61,21 +62,17 @@ dup :: Computation ()
 dup = modify dup_
 
 dup_ :: RPNState -> RPNState
-dup_ = smap newStk
-	where
-		newStk oldStk = case oldStk of
-			[] -> oldStk
+dup_ = smap $ \case
+			[] -> []
 			stk@(x:_) -> x:stk
 
 swap :: Computation ()
 swap = modify swap_
 
 swap_ :: RPNState -> RPNState
-swap_ = smap newStk
-	where
-		newStk oldStk = case oldStk of
+swap_ = smap $ \case
 			(x:y:xs) -> y:x:xs
-			_ -> oldStk
+			xs -> xs
 
 clear :: Computation ()
 clear = modify clear_

@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 module Math.RainCalc.Modifier where
 import           Control.Monad            ((>=>))
 import           Control.Monad.State.Lazy (gets, modify)
@@ -33,9 +34,9 @@ soloHelpAction :: Computation String
 soloHelpAction = (return . unlines) outLines
 	where
 		outLines = header : map doWrap
-			[Map.keys operators
-			,Map.keys commands
-			,Map.keys modifiers]
+			[ Map.keys operators
+			, Map.keys commands
+			, Map.keys modifiers]
 		header = "Available Commands: "
 		doWrap = wrapLine 60 . unwords
 
@@ -76,9 +77,8 @@ soloRegisterAction = return "No register supplied."
 
 toRegisterAction :: String -> Computation String
 toRegisterAction [c]
-	| Reg.isValid c = do
-		popped <- pop 1
-		case popped of
+	| Reg.isValid c = pop 1 >>=
+		\case
 			[x] -> Reg.setR c x >> return ""
 			_ -> return "Error: Empty stack"
 	| otherwise = return $ "Invalid register: " ++ [c]
