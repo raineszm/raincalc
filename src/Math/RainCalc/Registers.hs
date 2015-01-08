@@ -6,7 +6,7 @@ import qualified Data.Map                 as Map
 import qualified Math.RainCalc.RPNState   as S
 
 setR :: Char -> Double -> S.Computation ()
-setR r val = modify $ S.rmap (Map.insert r val)
+setR r = modify . S.rmap . Map.insert r
 
 getR :: Char -> S.Computation (Maybe Double)
 getR r = gets $ Map.lookup r . S.registers_

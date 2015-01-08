@@ -82,5 +82,4 @@ isCommand tok = Map.member tok commands
 
 handleCommand :: String -> Computation String
 handleCommand tok = action_ foundCmd
-    where
-        (Just foundCmd) = Map.lookup tok commands
+    where ~(Just foundCmd) = Map.lookup tok commands

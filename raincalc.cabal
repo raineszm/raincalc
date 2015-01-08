@@ -21,7 +21,13 @@ executable raincalc
 
 library
   hs-source-dirs:  src/
-  build-depends:     base == 4.*, containers, haskeline, mtl == 2.1.2, transformers == 0.3.0.0, regex-pcre
+  build-depends:
+    base == 4.*
+    , containers
+    , haskeline
+    , mtl == 2.1.2
+    , transformers == 0.3.0.0
+    , regex-pcre
   exposed-modules:
     Math.RainCalc.Classes
     , Math.RainCalc.Command
@@ -32,7 +38,8 @@ library
     , Math.RainCalc.Registers
     , Math.RainCalc.RPNState
     , Math.RainCalc.Utils
-  extensions:          TupleSections
+  extensions:
+    TupleSections
 
 test-suite spec
   type:
