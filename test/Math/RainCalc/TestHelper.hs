@@ -19,4 +19,3 @@ execWithStack c = execState c . stackToState
 
 top :: Computation a -> Double
 top c = head $ evalState (c >> pop 1) emptyState
-
