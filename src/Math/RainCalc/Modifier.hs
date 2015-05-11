@@ -42,10 +42,13 @@ soloHelpAction = (return . unlines) outLines
 
 helpAction ::String -> Computation String
 helpAction cmd
-	| isModifier cmd = return $ formatHelp cmd modifiers
-	| isCommand cmd = return $ formatHelp cmd commands
-	| isOperator cmd = return $ formatHelp cmd operators
+	| isModifier cmd = helpFrom modifiers
+	| isCommand cmd = helpFrom commands
+	| isOperator cmd = helpFrom operators
 	| otherwise = return $ "Unknown command " ++ cmd
+            where
+                helpFrom :: (Documented v) => Map.Map String v -> Computation String
+                helpFrom = return . formatHelp cmd
 
 formatHelp :: (Documented v) => String -> Map.Map String v -> String
 formatHelp key objs = "Help for " ++ key ++ ":\n" ++ getHelp obj
