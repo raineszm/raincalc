@@ -25,8 +25,8 @@ library
     base == 4.*
     , containers
     , haskeline
-    , mtl == 2.1.2
-    , transformers == 0.3.0.0
+    , mtl
+    , transformers
     , regex-pcre
   exposed-modules:
     Math.RainCalc.Classes
