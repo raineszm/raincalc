@@ -1,17 +1,17 @@
 module Math.RainCalc.Operator where
-import           Control.Monad          (unless)
-import Control.Monad.State.Lazy (modify)
-import           Data.List              (intercalate)
-import qualified Data.Map               as Map
+import           Control.Monad            (unless)
+import           Control.Monad.State.Lazy (modify)
+import           Data.List                (intercalate)
+import qualified Data.Map                 as Map
 
 import           Math.RainCalc.Classes
-import           Math.RainCalc.RPNState (Computation, pop, push, smap)
-import           Math.RainCalc.Utils    (expandWith)
+import           Math.RainCalc.RPNState   (Computation, pop, push, smap)
+import           Math.RainCalc.Utils      (expandWith)
 
 data Operator = Operator
 	{arity_ 	:: Int
 	,action_ 	:: [Double] -> Double
-	,help_ 		:: String}
+	,help_ 		:: St  ring}
 
 instance Documented Operator where
 	getHelp = help_

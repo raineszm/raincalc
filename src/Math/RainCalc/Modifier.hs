@@ -18,8 +18,8 @@ import           Math.RainCalc.Utils
 
 data Modifier = Modifier
 	{action_ :: String -> Computation String
-	,solo_   :: Computation String
-	,help_   :: String}
+	,solo_   :: Co  mputation String
+	,help_   :: St  ring}
 
 instance Documented Modifier where
 	getHelp = help_

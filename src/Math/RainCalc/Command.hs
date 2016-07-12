@@ -1,5 +1,5 @@
 module Math.RainCalc.Command where
-import Control.Applicative ((<$>))
+import           Control.Applicative      ((<$>))
 import           Control.Monad.State.Lazy
 import qualified Data.Map                 as Map
 

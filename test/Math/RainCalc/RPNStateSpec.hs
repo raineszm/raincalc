@@ -1,6 +1,6 @@
 module Math.RainCalc.RPNStateSpec (spec) where
 
-import           Control.Applicative
+import           Control.Applicative      ()
 import           Data.List                (isInfixOf, mapAccumL)
 import           Math.RainCalc.RPNState
 import           Test.Hspec
@@ -87,5 +87,3 @@ formatSpec = describe "formatStack" $ do
             let fmted = formatStack stk
                 matcher i x = (i + 1, fmtEntryMatcher i x fmted)
             in and (snd $ mapAccumL matcher 0 stk)
-
-

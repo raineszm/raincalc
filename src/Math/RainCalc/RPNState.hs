@@ -2,13 +2,13 @@
 module Math.RainCalc.RPNState where
 import           Control.Monad.State.Strict as StateM
 
-import           Data.List                (mapAccumL)
-import qualified Data.Map                 as Map
+import           Data.List                  (mapAccumL)
+import qualified Data.Map                   as Map
 
 data RPNState = RPNState
-	{stack_ 	:: [Double]
+	{stack_ 	:: [Do    uble]
 	,registers_ :: Map.Map Char Double
-	,modifier_ 	:: Maybe String
+	,modifier_ 	:: May be String
 	,terminate_ :: Bool}
 
 type Computation = StateM.State RPNState
