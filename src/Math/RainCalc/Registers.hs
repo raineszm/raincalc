@@ -16,6 +16,6 @@ isValid = isAlpha . toLower
 
 present :: S.RPNState -> String
 present = concatMap presentPair . Map.toList . S.registers_
-	where
-		presentPair (k,v) = show k ++ ": " ++ show v ++ "\n"
+        where
+                presentPair (k,v) = show k ++ ": " ++ show v ++ "\n"
 

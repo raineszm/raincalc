@@ -6,31 +6,31 @@ import           Data.List                  (mapAccumL)
 import qualified Data.Map                   as Map
 
 data RPNState = RPNState
-	{stack_ 	:: [Do    uble]
-	,registers_ :: Map.Map Char Double
-	,modifier_ 	:: May be String
-	,terminate_ :: Bool}
+        {stack_     :: [Double]
+        ,registers_ :: Map.Map Char Double
+        ,modifier_  :: Maybe String
+        ,terminate_ :: Bool}
 
 type Computation = StateM.State RPNState
 
 formatStack :: [Double] -> String
 formatStack [] = "(EMPTY)"
 formatStack stack = header ++ contents
-	where
-		header = "STACK:\n(TOP)\n"
-		contents = concat . snd $ mapAccumL accum (0 :: Int) stack
-		accum i x = (i + 1, formatLine i x)
-		formatLine i x = show i ++ " : " ++ show x ++ "\n"
+        where
+                header = "STACK:\n(TOP)\n"
+                contents = concat . snd $ mapAccumL accum (0 :: Int) stack
+                accum i x = (i + 1, formatLine i x)
+                formatLine i x = show i ++ " : " ++ show x ++ "\n"
 
 displayState :: RPNState -> String
 displayState = formatStack . stack_
 
 emptyState :: RPNState
 emptyState = RPNState
-	{stack_ = []
-	,registers_ = Map.empty
-	,modifier_ = Nothing
-	,terminate_ = False}
+        {stack_ = []
+        ,registers_ = Map.empty
+        ,modifier_ = Nothing
+        ,terminate_ = False}
 
 terminate :: Computation ()
 terminate = modify $ \state' -> state' {terminate_ = True}
@@ -52,27 +52,27 @@ push_ num = smap (num:)
 
 pop :: Int -> Computation [Double]
 pop n = do
-	stack <- gets stack_
-	modify $ smap (drop n)
-	return $ case stack of
-		[] -> []
-		_ -> take n stack
+        stack <- gets stack_
+        modify $ smap (drop n)
+        return $ case stack of
+                [] -> []
+                _ -> take n stack
 
 dup :: Computation ()
 dup = modify dup_
 
 dup_ :: RPNState -> RPNState
 dup_ = smap $ \case
-			[] -> []
-			stk@(x:_) -> x:stk
+                        [] -> []
+                        stk@(x:_) -> x:stk
 
 swap :: Computation ()
 swap = modify swap_
 
 swap_ :: RPNState -> RPNState
 swap_ = smap $ \case
-			(x:y:xs) -> y:x:xs
-			xs -> xs
+                        (x:y:xs) -> y:x:xs
+                        xs -> xs
 
 clear :: Computation ()
 clear = modify clear_
