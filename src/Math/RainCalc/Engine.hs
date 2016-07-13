@@ -1,5 +1,6 @@
 module Math.RainCalc.Engine where
-import           Control.Monad              (liftM, liftM2)
+import           Control.Applicative        ((<$>))
+import           Control.Monad              (liftM2)
 import           Control.Monad.State.Strict (runState)
 import           Data.Char                  (toLower)
 import           System.Console.Haskeline   (InputT, defaultSettings,
@@ -42,7 +43,7 @@ processLine state line = do
 
 processLine_ :: String -> S.Computation String
 processLine_ line = liftM2 (++)
-    (liftM concat $ mapM processToken (words line))
+    (concat <$> mapM processToken (words line))
     Mod.cleanupModifiers
 
 
