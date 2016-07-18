@@ -2,11 +2,11 @@ module Math.RainCalc.TestHelper where
 import           Control.Monad.State.Strict (evalState, execState)
 import           Math.RainCalc.RPNState
 
-run :: Computation a -> RPNState
-run c = execWithStack c []
-
 runStack :: Computation a -> [Double]
-runStack = stack_ . run
+runStack = flip runOnStack []
+
+runOnStack :: Computation a -> [Double] -> [Double]
+runOnStack c = stack_ . execWithStack c
 
 stackToState :: [Double] -> RPNState
 stackToState stack = emptyState { stack_ = stack }

@@ -67,7 +67,7 @@ smapSpec = describe "smap" $ do
 
 
 clearSpec :: Spec
-clearSpec = describe "clear" $ do
+clearSpec = describe "clear" $
     it "should always give us an empty stack" $ property $
         null . stack_ . execWithStack clear
 

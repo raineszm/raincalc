@@ -22,7 +22,7 @@ binaryOperator names f = Operator
         ,action_ = action
         ,help_ = help}
         where
-                action (x:y:[]) = y `f` x
+                action ~[x, y] = y `f` x
                 help = simpleHelp mainName 2
                 mainName = head names
 
