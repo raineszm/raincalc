@@ -6,10 +6,16 @@ import qualified Data.Map                 as Map
 import qualified Math.RainCalc.RPNState   as S
 
 setR :: Char -> Double -> S.Computation ()
-setR r = modify . S.rmap . Map.insert r
+setR r = modify . setR_ r
+
+setR_ :: Char -> Double -> S.RPNState -> S.RPNState
+setR_ r = S.rmap . Map.insert r
 
 getR :: Char -> S.Computation (Maybe Double)
-getR r = gets $ Map.lookup r . S.registers_
+getR = gets . getR_
+
+getR_ :: Char -> S.RPNState -> Maybe Double
+getR_ r = Map.lookup r . S.registers_
 
 isValid :: Char -> Bool
 isValid = isAlpha . toLower
@@ -18,4 +24,3 @@ present :: S.RPNState -> String
 present = concatMap presentPair . Map.toList . S.registers_
         where
                 presentPair (k,v) = show k ++ ": " ++ show v ++ "\n"
-
