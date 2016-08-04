@@ -1,6 +1,7 @@
 module Math.RainCalc.Engine where
-import           Control.Monad              (liftM2)
+import           Control.Applicative        (liftA2, liftA3)
 import           Control.Monad.State.Strict (runState)
+import           Data.Bool                  (bool)
 import           Data.Char                  (toLower)
 import           System.Console.Haskeline   (InputT, defaultSettings,
                                              getInputLine, outputStrLn,
@@ -34,39 +35,29 @@ mainLoop state = getInputLine (prompt state) >>=
     maybe (return state) (processLine state)
 
 processLine :: S.RPNState -> String -> InputT IO S.RPNState
-processLine state line = do
-        newState <- doOutput (processLine_ $ map toLower line) state
-        if S.terminate_ newState
-            then return newState
-            else mainLoop newState
+processLine state line =
+  doOutput (processLine_ $ map toLower line) state >>=
+    liftA3 bool mainLoop return S.terminate_
 
 processLine_ :: String -> S.Computation String
-processLine_ line = liftM2 (++)
-    (concat <$> mapM processToken (words line))
+processLine_ line = liftA2 (++)
+    (concat <$> traverse processToken (words line))
     Mod.cleanupModifiers
 
-
 doOutput :: S.Computation String -> S.RPNState -> InputT IO S.RPNState
-doOutput comp oldState = do
-    let (out, newState) = runState comp oldState
-    outputStrLn out
-    return newState
-
-emptyOutput :: S.Computation () -> S.Computation String
-emptyOutput = (>> return "")
+doOutput comp oldState =
+  let (out, newState) = runState comp oldState
+    in newState <$ outputStrLn out
 
 processToken :: String -> S.Computation String
-processToken tok = do
-    armed <- Mod.isArmed
-    if armed then
-        Mod.triggerModifier tok
-        else processToken_ tok
+processToken tok = Mod.isArmed >>=
+    bool (processToken_ tok) (Mod.triggerModifier tok)
 
 
 processToken_ :: String -> S.Computation String
 processToken_ tok
-    | Mod.isModifier tok = emptyOutput $ Mod.armModifier tok
-    | Op.isOperator tok = emptyOutput $ Op.handleOperator tok
+    | Mod.isModifier tok = "" <$ Mod.armModifier tok
+    | Op.isOperator tok = "" <$ Op.handleOperator tok
     | Cmd.isCommand tok = Cmd.handleCommand tok
-    | N.isNumber tok = emptyOutput $ N.handleNumber tok
+    | N.isNumber tok = "" <$ N.handleNumber tok
     | otherwise = return $ "Unrecognized sequence \"" ++ tok ++  "\""
