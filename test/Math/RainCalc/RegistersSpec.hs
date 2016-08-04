@@ -1,6 +1,5 @@
 module Math.RainCalc.RegistersSpec (spec) where
 
-import           Control.Applicative     ()
 import           Math.RainCalc.Registers
 import           Math.RainCalc.RPNState  (emptyState)
 import           Test.Hspec

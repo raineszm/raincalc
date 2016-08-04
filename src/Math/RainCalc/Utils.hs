@@ -6,7 +6,7 @@ module Math.RainCalc.Utils
 where
 
 expandWith :: ([String] -> a -> b) -> [([String], a)] -> [(String, b)]
-expandWith f = concatMap alias
+expandWith f = foldMap alias
         where
                 alias (names, x) = map (,f names x) names
 

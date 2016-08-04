@@ -1,12 +1,12 @@
 module Math.RainCalc.Command where
-import           Control.Applicative      ((<$>))
 import           Control.Monad.State.Lazy
-import qualified Data.Map                 as Map
+import qualified Data.Map                  as Map
 
 import           Math.RainCalc.Classes
-import           Math.RainCalc.Registers  (present)
-import           Math.RainCalc.RPNState   (Computation, clear, displayState,
-                                           dup, pop, swap, terminate)
+import           Math.RainCalc.Computation (Computation, clear, dup, pop, swap,
+                                            terminate)
+import           Math.RainCalc.Registers   (present)
+import           Math.RainCalc.RPNState    (displayState)
 import           Math.RainCalc.Utils
 
 data Command = Command

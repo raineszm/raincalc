@@ -19,13 +19,22 @@ spec = describe "RPNState" $ do
     clearSpec
     formatSpec
 
+fromStack :: [Double] -> RPNState
+fromStack stk = emptyState {stack_ = stk}
+
+szoom :: (RPNState -> RPNState) -> [Double] -> [Double]
+szoom f = stack_ . f . fromStack
+
+onEmpty :: (RPNState -> RPNState) -> [Double]
+onEmpty = flip szoom []
+
 pushSpec :: Spec
 pushSpec = describe "push" $
     it "should add the number to the stack" $ property $
-        elem <$> id <*> runStack . push
+        elem <$> id <*> onEmpty . push_
 
 popSpec :: Spec
-popSpec = describe "push" $ do
+popSpec = describe "pop" $ do
     it "should return an empty list for an empty stack" $ property $
         null . runStack . pop
     it "should get the top of the stack" $ property $
@@ -38,38 +47,37 @@ popSpec = describe "push" $ do
 dupSpec :: Spec
 dupSpec = describe "dup" $ do
     it "should be id on the empty stack" $
-        runStack dup `shouldSatisfy` null
+        onEmpty dup_ `shouldSatisfy` null
 
     it "should copy the top element of the stack" $ property $
         \stk-> not (null stk) ==>
             let (x:_) = stk in
-            (stack_ . execWithStack dup) stk
+            szoom dup_ stk
             == x:stk
 
 swapSpec :: Spec
 swapSpec = describe "swap" $ do
     it "should be id on the empty stack" $
-        runStack swap `shouldSatisfy` null
+        onEmpty swap_ `shouldSatisfy` null
 
     it "should swap the two top elements of the stack" $ property $
         \stk-> (not . null . drop 1) stk ==>
             let (x:y:xs) = stk in
-            (stack_ . execWithStack swap) stk
+            szoom swap_ stk
             == y:x:xs
 
 smapSpec :: Spec
 smapSpec = describe "smap" $ do
     it "should allow modification of the stack size" $
-        stack_ (smap (1:) emptyState) `shouldBe` [1]
+        onEmpty (smap (1:)) `shouldBe` [1]
 
     it "should apply the given function to the stack" $ property $
-        \f -> stack_ (smap f emptyState) == f []
-
+        \f -> onEmpty (smap f) == f []
 
 clearSpec :: Spec
 clearSpec = describe "clear" $
     it "should always give us an empty stack" $ property $
-        null . stack_ . execWithStack clear
+        null . szoom clear_
 
 fmtEntryMatcher :: Int -> Double -> String -> Bool
 fmtEntryMatcher i x = any ((&&) <$> strInfix i <*> strInfix x) . lines

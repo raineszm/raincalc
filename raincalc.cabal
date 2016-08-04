@@ -31,6 +31,7 @@ library
   exposed-modules:
     Math.RainCalc.Classes
     , Math.RainCalc.Command
+    , Math.RainCalc.Computation
     , Math.RainCalc.Engine
     , Math.RainCalc.Modifier
     , Math.RainCalc.Numbers
