@@ -33,7 +33,11 @@ isNumberSpec = describe "isNumber" $ do
 
 
 handleNumberSpec :: Spec
-handleNumberSpec = describe "handleNumber" $
+handleNumberSpec = describe "handleNumber" $ do
 
     it "should push the number to the stack" $ property $
         \n -> (top . handleNumber . show) n == (n :: Double)
+
+    -- Make sure we don't get a no parse error on this
+    it "should handle decimal without leading 0" $
+        top (handleNumber ".5") `shouldBe` 0.5

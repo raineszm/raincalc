@@ -1,10 +1,17 @@
-module Math.RainCalc.Numbers where
+module Math.RainCalc.Numbers
+  ( handleNumber
+  , isNumber)
+where
 import           Text.Regex.PCRE
 
-import           Math.RainCalc.RPNState (Computation, push)
+import           Math.RainCalc.Computation (Computation, push)
 
 handleNumber :: String -> Computation ()
-handleNumber num  = push $ read num
+handleNumber = push . read'
+
+read' :: String -> Double
+read' num@('.':_) = read' ('0':num)
+read' x = read x
 
 numRegex :: String
 numRegex = "^-?(\\d+\\.\\d*|\\d*\\.\\d+|\\d+)(e-?\\d+)?$"
