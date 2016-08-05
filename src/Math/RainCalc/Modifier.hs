@@ -1,19 +1,19 @@
 {-# LANGUAGE LambdaCase #-}
 module Math.RainCalc.Modifier where
-import           Control.Monad            ((>=>))
-import           Control.Monad.State.Lazy (gets, modify)
-import           Data.List                (stripPrefix)
-import qualified Data.Map                 as Map
-import           Data.Maybe               (fromJust, fromMaybe, isJust,
-                                           isNothing)
-import           Numeric                  (readHex)
+import           Control.Monad             ((>=>))
+import           Control.Monad.State.Lazy  (gets, modify)
+import           Data.List                 (stripPrefix)
+import qualified Data.Map                  as Map
+import           Data.Maybe                (fromJust, fromMaybe, isJust,
+                                            isNothing)
+import           Numeric                   (readHex)
 
 import           Math.RainCalc.Classes
-import           Math.RainCalc.Command    (commands, isCommand)
-import           Math.RainCalc.Operator   (isOperator, operators)
-import qualified Math.RainCalc.Registers  as Reg
-import           Math.RainCalc.RPNState   (Computation, RPNState, modifier_,
-                                           pop, push)
+import           Math.RainCalc.Command     (commands, isCommand)
+import           Math.RainCalc.Computation (Computation, pop, push)
+import           Math.RainCalc.Operator    (isOperator, operators)
+import qualified Math.RainCalc.Registers   as Reg
+import           Math.RainCalc.RPNState    (RPNState, modifier_)
 import           Math.RainCalc.Utils
 
 data Modifier = Modifier
@@ -122,22 +122,20 @@ armModifier modName = modify $ \state -> state { modifier_ = Just modName}
 disarmModifier :: Computation ()
 disarmModifier = modify $ \state -> state { modifier_ = Nothing}
 
-activeModifier :: RPNState -> Bool
-activeModifier = isJust . modifier_
+isArmed_ :: RPNState -> Bool
+isArmed_ = isJust . modifier_
 
 isArmed :: Computation Bool
-isArmed = gets activeModifier
+isArmed = gets isArmed_
+
+activeModifier :: RPNState -> Maybe Modifier
+activeModifier = modifier_ >=> (`Map.lookup` modifiers)
+
+doAction :: String -> Maybe Modifier -> Computation String
+doAction tok = maybe (return "Somehow a modifier became undefined") (`action_` tok)
 
 triggerModifier :: String -> Computation String
-triggerModifier tok = do
-        mmod <- gets $ modifier_ >=> (`Map.lookup` modifiers)
-        disarmModifier
-        if isNothing mmod
-                then return "Somehow a modifier became undefined"
-                else action_ (fromJust mmod) tok
+triggerModifier tok = gets activeModifier <* disarmModifier >>= doAction tok
 
 cleanupModifiers :: Computation String
-cleanupModifiers = do
-        mmod <- gets $ modifier_ >=> (`Map.lookup` modifiers)
-        disarmModifier
-        maybe (return "") solo_ mmod
+cleanupModifiers = gets activeModifier <* disarmModifier >>= maybe (return "") solo_
