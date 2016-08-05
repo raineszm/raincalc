@@ -1,6 +1,18 @@
 {-# LANGUAGE LambdaCase #-}
-module Math.RainCalc.RPNState where
-import           Control.Monad.State.Strict as StateM
+module Math.RainCalc.RPNState
+  ( RPNState(..)
+  , emptyState
+  , smap
+  , rmap
+  , formatStack
+  , displayState
+  , swap_
+  , stackSize
+  , push_
+  , dup_
+  , clear_
+  )
+where
 
 import           Data.List                  (mapAccumL)
 import qualified Data.Map                   as Map
@@ -10,8 +22,6 @@ data RPNState = RPNState
         ,registers_ :: Map.Map Char Double
         ,modifier_  :: Maybe String
         ,terminate_ :: Bool}
-
-type Computation = StateM.State RPNState
 
 formatStack :: [Double] -> String
 formatStack [] = "(EMPTY)"
@@ -32,9 +42,6 @@ emptyState = RPNState
         ,modifier_ = Nothing
         ,terminate_ = False}
 
-terminate :: Computation ()
-terminate = modify $ \state' -> state' {terminate_ = True}
-
 stackSize :: RPNState -> Int
 stackSize = length . stack_
 
@@ -44,38 +51,18 @@ smap f state' = state' {stack_ = f $ stack_ state'}
 rmap :: (Map.Map Char Double -> Map.Map Char Double) -> RPNState -> RPNState
 rmap f state' = state' {registers_ = f $ registers_ state'}
 
-push :: Double -> Computation ()
-push = modify . push_
-
 push_ :: Double -> RPNState -> RPNState
 push_ num = smap (num:)
-
-pop :: Int -> Computation [Double]
-pop n = do
-        stack <- gets stack_
-        modify $ smap (drop n)
-        return $ case stack of
-                [] -> []
-                _ -> take n stack
-
-dup :: Computation ()
-dup = modify dup_
 
 dup_ :: RPNState -> RPNState
 dup_ = smap $ \case
                         [] -> []
                         stk@(x:_) -> x:stk
 
-swap :: Computation ()
-swap = modify swap_
-
 swap_ :: RPNState -> RPNState
 swap_ = smap $ \case
                         (x:y:xs) -> y:x:xs
                         xs -> xs
-
-clear :: Computation ()
-clear = modify clear_
 
 clear_ :: RPNState -> RPNState
 clear_ = smap (const [])

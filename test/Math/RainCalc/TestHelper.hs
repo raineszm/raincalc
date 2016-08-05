@@ -1,5 +1,6 @@
 module Math.RainCalc.TestHelper where
 import           Control.Monad.State.Strict (evalState, execState)
+import           Math.RainCalc.Computation
 import           Math.RainCalc.RPNState
 
 runStack :: Computation a -> [Double]

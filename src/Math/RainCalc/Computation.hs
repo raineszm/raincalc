@@ -1,4 +1,12 @@
-module Math.RainCalc.Computation where
+module Math.RainCalc.Computation
+  ( Computation
+  , terminate
+  , push
+  , pop
+  , dup
+  , swap
+  , clear)
+where
 
 import           Control.Monad.State.Strict as StateM
 import qualified Math.RainCalc.RPNState     as S

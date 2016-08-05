@@ -1,4 +1,9 @@
-module Math.RainCalc.Command where
+module Math.RainCalc.Command
+  ( isCommand
+  , handleCommand
+  , commands
+  )
+where
 import           Control.Monad.State.Lazy
 import qualified Data.Map                  as Map
 

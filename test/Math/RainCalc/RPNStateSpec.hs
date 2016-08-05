@@ -1,18 +1,15 @@
 module Math.RainCalc.RPNStateSpec (spec) where
 
-import           Control.Applicative      ()
-import           Data.List                (isInfixOf, mapAccumL)
+import           Control.Applicative    ()
+import           Data.List              (isInfixOf, mapAccumL)
 import           Math.RainCalc.RPNState
 import           Test.Hspec
 import           Test.QuickCheck
-import           Text.Show.Functions      ()
-
-import           Math.RainCalc.TestHelper
+import           Text.Show.Functions    ()
 
 spec :: Spec
 spec = describe "RPNState" $ do
     pushSpec
-    popSpec
     smapSpec
     dupSpec
     swapSpec
@@ -32,17 +29,6 @@ pushSpec :: Spec
 pushSpec = describe "push" $
     it "should add the number to the stack" $ property $
         elem <$> id <*> onEmpty . push_
-
-popSpec :: Spec
-popSpec = describe "pop" $ do
-    it "should return an empty list for an empty stack" $ property $
-        null . runStack . pop
-    it "should get the top of the stack" $ property $
-        (==) <$> popOne . pure <*> pure
-    where
-        popOne = popN 1
-        popN :: Int -> [Double] -> [Double]
-        popN n = evalWithStack (pop n)
 
 dupSpec :: Spec
 dupSpec = describe "dup" $ do

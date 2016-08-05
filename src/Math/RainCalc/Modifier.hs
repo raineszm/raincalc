@@ -1,5 +1,12 @@
 {-# LANGUAGE LambdaCase #-}
-module Math.RainCalc.Modifier where
+module Math.RainCalc.Modifier
+  ( triggerModifier
+  , cleanupModifiers
+  , armModifier
+  , isModifier
+  , isArmed
+  )
+where
 import           Control.Monad             ((>=>))
 import           Control.Monad.State.Lazy  (gets, modify)
 import           Data.List                 (stripPrefix)

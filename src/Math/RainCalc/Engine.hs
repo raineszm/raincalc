@@ -8,6 +8,7 @@ import           System.Console.Haskeline   (InputT, defaultSettings,
                                              runInputT)
 
 import qualified Math.RainCalc.Command      as Cmd
+import qualified Math.RainCalc.Computation  as C
 import qualified Math.RainCalc.Modifier     as Mod
 import qualified Math.RainCalc.Numbers      as N
 import qualified Math.RainCalc.Operator     as Op
@@ -39,22 +40,22 @@ processLine state line =
   doOutput (processLine_ $ map toLower line) state >>=
     liftA3 bool mainLoop return S.terminate_
 
-processLine_ :: String -> S.Computation String
+processLine_ :: String -> C.Computation String
 processLine_ line = liftA2 (++)
     (concat <$> traverse processToken (words line))
     Mod.cleanupModifiers
 
-doOutput :: S.Computation String -> S.RPNState -> InputT IO S.RPNState
+doOutput :: C.Computation String -> S.RPNState -> InputT IO S.RPNState
 doOutput comp oldState =
   let (out, newState) = runState comp oldState
     in newState <$ outputStrLn out
 
-processToken :: String -> S.Computation String
+processToken :: String -> C.Computation String
 processToken tok = Mod.isArmed >>=
     bool (processToken_ tok) (Mod.triggerModifier tok)
 
 
-processToken_ :: String -> S.Computation String
+processToken_ :: String -> C.Computation String
 processToken_ tok
     | Mod.isModifier tok = "" <$ Mod.armModifier tok
     | Op.isOperator tok = "" <$ Op.handleOperator tok

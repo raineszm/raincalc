@@ -3,15 +3,16 @@ import           Control.Monad.State.Lazy
 import           Data.Char                (isAlpha, toLower)
 import qualified Data.Map                 as Map
 
+import qualified Math.RainCalc.Computation as C
 import qualified Math.RainCalc.RPNState   as S
 
-setR :: Char -> Double -> S.Computation ()
+setR :: Char -> Double -> C.Computation ()
 setR r = modify . setR_ r
 
 setR_ :: Char -> Double -> S.RPNState -> S.RPNState
 setR_ r = S.rmap . Map.insert r
 
-getR :: Char -> S.Computation (Maybe Double)
+getR :: Char -> C.Computation (Maybe Double)
 getR = gets . getR_
 
 getR_ :: Char -> S.RPNState -> Maybe Double

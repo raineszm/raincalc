@@ -1,12 +1,18 @@
-module Math.RainCalc.Operator where
-import           Control.Monad            (unless)
-import           Control.Monad.State.Lazy (modify)
-import           Data.List                (intercalate)
-import qualified Data.Map                 as Map
+module Math.RainCalc.Operator
+  ( operators
+  , isOperator
+  , handleOperator)
+where
+import           Control.Monad             (unless)
+import           Control.Monad.State.Lazy  (modify)
+import           Data.List                 (intercalate)
+import qualified Data.Map                  as Map
 
 import           Math.RainCalc.Classes
-import           Math.RainCalc.RPNState   (Computation, pop, push, smap)
-import           Math.RainCalc.Utils      (expandWith)
+import           Math.RainCalc.Computation (Computation, pop, push)
+import           Math.RainCalc.RPNState    (smap)
+
+import           Math.RainCalc.Utils       (expandWith)
 
 data Operator = Operator
         {arity_  :: Int
