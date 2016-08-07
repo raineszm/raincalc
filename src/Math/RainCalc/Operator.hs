@@ -55,31 +55,34 @@ buildOperator arity names f = Operator
         ,action_ = f
         ,help_ = simpleHelp (head names) arity}
 
+unaryOperator :: [String] -> (Double -> Double) -> Operator
+unaryOperator names f = buildOperator 1 names (f . head)
+
 unaryOperators :: [(String, Operator)]
-unaryOperators = expandWith (buildOperator 1)
-        [(["sin", "s"], sin . head)
-        ,(["cos", "c"], cos . head)
-        ,(["tan", "t"], tan . head)
-        ,(["sinh", "sh"], sinh . head)
-        ,(["cosh", "ch"], cosh . head)
-        ,(["tanh", "th"], tanh . head)
-        ,(["atan"], atan . head)
-        ,(["acos"], acos . head)
-        ,(["asin"], asin . head)
-        ,(["exp"], exp . head)
-        ,(["atanh"], atanh . head)
-        ,(["acosh"], acosh . head)
-        ,(["asinh"], asinh . head)
-        ,(["exp"], exp . head)
-        ,(["ln", "log"], log . head)
-        ,(["deg", "todegrees"], toDegrees . head)
-        ,(["rad", "toradians"], toRadians . head)
-        ,(["factorial", "fact", "!"], factorial . head)
-        ,(["inv", "1/"], (1/) . head)
-        ,(["neg"], negate . head)
-        ,(["signum", "sgn", "sign"], signum . head)
-        ,(["abs", "||"], abs . head)
-        ,(["sqrt", "v"], sqrt . head)]
+unaryOperators = expandWith unaryOperator
+        [(["sin", "s"], sin)
+        ,(["cos", "c"], cos)
+        ,(["tan", "t"], tan)
+        ,(["sinh", "sh"], sinh)
+        ,(["cosh", "ch"], cosh)
+        ,(["tanh", "th"], tanh)
+        ,(["atan"], atan)
+        ,(["acos"], acos)
+        ,(["asin"], asin)
+        ,(["exp"], exp)
+        ,(["atanh"], atanh)
+        ,(["acosh"], acosh)
+        ,(["asinh"], asinh)
+        ,(["exp"], exp)
+        ,(["ln", "log"], log)
+        ,(["deg", "todegrees"], toDegrees)
+        ,(["rad", "toradians"], toRadians)
+        ,(["factorial", "fact", "!"], factorial)
+        ,(["inv", "1/"], (1/))
+        ,(["neg"], negate)
+        ,(["signum", "sgn", "sign"], signum)
+        ,(["abs", "||"], abs)
+        ,(["sqrt", "v"], sqrt)]
 
 toDegrees :: Double -> Double
 toDegrees = (180*) . (/pi)
@@ -111,7 +114,7 @@ operators = Map.fromList $ concat
         ,foldOperators]
 
 isOperator :: String -> Bool
-isOperator name = Map.member name operators
+isOperator = (`Map.member` operators)
 
 evalOperator :: Operator -> Computation ()
 evalOperator op
@@ -119,7 +122,7 @@ evalOperator op
                 args <- pop arity
                 unless (length args < arity)
                         (push $ action args)
-        | otherwise = modify $ smap (return . action)
+        | otherwise = modify $ smap (pure . action)
         where
                 action = action_ op
                 arity = arity_ op
