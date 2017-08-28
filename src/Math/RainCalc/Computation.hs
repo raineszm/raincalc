@@ -23,9 +23,7 @@ pop :: Int -> Computation [Double]
 pop n = do
         stack <- gets S.stack_
         modify $ S.smap (drop n)
-        return $ case stack of
-                [] -> []
-                _ -> take n stack
+        return $ take n stack
 
 dup :: Computation ()
 dup = modify S.dup_
