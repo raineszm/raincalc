@@ -24,7 +24,7 @@ library:
   - containers
   - haskeline
   - mtl
-  - regex-pcre
+  - regex-pcre-builtin
 executables:
   raincalc:
     main: Main.hs
