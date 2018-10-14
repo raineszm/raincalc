@@ -1,10 +1,11 @@
 module Math.RainCalc.Registers where
+
 import           Control.Monad.State.Lazy
-import           Data.Char                (isAlpha, toLower)
-import qualified Data.Map                 as Map
+import           Data.Char                 (isAlpha, toLower)
+import qualified Data.Map                  as Map
 
 import qualified Math.RainCalc.Computation as C
-import qualified Math.RainCalc.RPNState   as S
+import qualified Math.RainCalc.RPNState    as S
 
 setR :: Char -> Double -> C.Computation ()
 setR r = modify . setR_ r
@@ -23,5 +24,5 @@ isValid = isAlpha . toLower
 
 present :: S.RPNState -> String
 present = concatMap presentPair . Map.toList . S.registers_
-        where
-                presentPair (k,v) = show k ++ ": " ++ show v ++ "\n"
+  where
+    presentPair (k, v) = show k ++ ": " ++ show v ++ "\n"

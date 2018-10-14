@@ -5,8 +5,8 @@ module Math.RainCalc.Computation
   , pop
   , dup
   , swap
-  , clear)
-where
+  , clear
+  ) where
 
 import           Control.Monad.State.Strict as StateM
 import qualified Math.RainCalc.RPNState     as S
@@ -21,9 +21,9 @@ push = modify . S.push_
 
 pop :: Int -> Computation [Double]
 pop n = do
-        stack <- gets S.stack_
-        modify $ S.smap (drop n)
-        return $ take n stack
+  stack <- gets S.stack_
+  modify $ S.smap (drop n)
+  return $ take n stack
 
 dup :: Computation ()
 dup = modify S.dup_
