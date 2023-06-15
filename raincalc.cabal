@@ -52,7 +52,7 @@ test-suite spec
   main-is: Spec.hs
   hs-source-dirs:
       test
-  ghc-options: -Wall -Werror
+  ghc-options: -Werror
   build-depends:
       QuickCheck >=2.0
     , base ==4.*

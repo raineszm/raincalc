@@ -47,7 +47,7 @@ swapSpec = describe "swap" $ do
         onEmpty swap_ `shouldSatisfy` null
 
     it "should swap the two top elements of the stack" $ property $
-        \stk-> (not . null . drop 1) stk ==>
+        \stk-> (length stk > 1)  ==>
             let (x:y:xs) = stk in
             szoom swap_ stk
             == y:x:xs
