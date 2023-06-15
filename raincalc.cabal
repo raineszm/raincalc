@@ -1,0 +1,75 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.34.4.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 998f21b5b5d660096f89b1cdc4ab0d4442a4eafeed8c4c1bc8c26a1bee80ea79
+
+name:           raincalc
+version:        0.1.0.0
+synopsis:       A simple rpn calculator in Haskell.
+category:       Math
+author:         Zach Raines
+maintainer:     raineszm+raincalc@gmail.com
+license:        GPL-3
+license-file:   LICENSE
+build-type:     Simple
+
+library
+  hs-source-dirs:
+      src/
+  build-depends:
+      base ==4.*
+    , containers
+    , haskeline
+    , mtl
+    , regex-pcre-builtin
+  exposed-modules:
+      Math.RainCalc.Classes
+      Math.RainCalc.Command
+      Math.RainCalc.Computation
+      Math.RainCalc.Engine
+      Math.RainCalc.Modifier
+      Math.RainCalc.Numbers
+      Math.RainCalc.Operator
+      Math.RainCalc.Registers
+      Math.RainCalc.RPNState
+      Math.RainCalc.Utils
+  other-modules:
+      Paths_raincalc
+  default-language: Haskell2010
+
+executable raincalc
+  main-is: Main.hs
+  other-modules:
+      Paths_raincalc
+  hs-source-dirs:
+      src-exec/
+  build-depends:
+      base ==4.*
+    , raincalc
+  default-language: Haskell2010
+
+test-suite spec
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  hs-source-dirs:
+      test
+  ghc-options: -Wall -Werror
+  build-depends:
+      QuickCheck >=2.0
+    , base ==4.*
+    , hspec >=1.3
+    , mtl
+    , raincalc
+  other-modules:
+      Math.RainCalc.ComputationSpec
+      Math.RainCalc.EngineSpec
+      Math.RainCalc.NumbersSpec
+      Math.RainCalc.OperatorSpec
+      Math.RainCalc.RegistersSpec
+      Math.RainCalc.RPNStateSpec
+      Math.RainCalc.TestHelper
+      Paths_raincalc
+  default-language: Haskell2010
