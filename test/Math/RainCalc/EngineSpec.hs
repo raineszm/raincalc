@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fno-warn-incomplete-uni-patterns #-}
 module Math.RainCalc.EngineSpec (spec) where
 
 import           Control.Applicative      ()
