@@ -1,24 +1,23 @@
 module Math.RainCalc.Operator
-  ( operators
-  , isOperator
-  , handleOperator
-  ) where
+  ( operators,
+    isOperator,
+    handleOperator,
+  )
+where
 
-import           Control.Monad             (unless)
-import           Control.Monad.State.Lazy  (modify)
-import           Data.List                 (intercalate)
-import qualified Data.Map                  as Map
-
-import           Math.RainCalc.Classes
-import           Math.RainCalc.Computation (Computation, pop, push)
-import           Math.RainCalc.RPNState    (smap)
-
-import           Math.RainCalc.Utils       (expandWith)
+import Control.Monad (unless)
+import Control.Monad.State.Lazy (modify)
+import Data.List (intercalate)
+import qualified Data.Map as Map
+import Math.RainCalc.Classes
+import Math.RainCalc.Computation (Computation, pop, push)
+import Math.RainCalc.RPNState (smap)
+import Math.RainCalc.Utils (expandWith)
 
 data Operator = Operator
-  { arity_  :: Int
-  , action_ :: [Double] -> Double
-  , help_   :: String
+  { arity_ :: Int,
+    action_ :: [Double] -> Double,
+    help_ :: String
   }
 
 instance Documented Operator where
@@ -35,11 +34,11 @@ binaryOperators :: [(String, Operator)]
 binaryOperators =
   expandWith
     binaryOperator
-    [ (["+"], (+))
-    , (["-"], (-))
-    , (["/"], (/))
-    , (["*"], (*))
-    , (["^", "**"], (**))
+    [ (["+"], (+)),
+      (["-"], (-)),
+      (["/"], (/)),
+      (["*"], (*)),
+      (["^", "**"], (**))
     ]
 
 simpleHelp :: String -> Int -> String
@@ -63,29 +62,29 @@ unaryOperators :: [(String, Operator)]
 unaryOperators =
   expandWith
     unaryOperator
-    [ (["sin", "s"], sin)
-    , (["cos", "c"], cos)
-    , (["tan", "t"], tan)
-    , (["sinh", "sh"], sinh)
-    , (["cosh", "ch"], cosh)
-    , (["tanh", "th"], tanh)
-    , (["atan"], atan)
-    , (["acos"], acos)
-    , (["asin"], asin)
-    , (["exp"], exp)
-    , (["atanh"], atanh)
-    , (["acosh"], acosh)
-    , (["asinh"], asinh)
-    , (["exp"], exp)
-    , (["ln", "log"], log)
-    , (["deg", "todegrees"], toDegrees)
-    , (["rad", "toradians"], toRadians)
-    , (["factorial", "fact", "!"], factorial)
-    , (["inv", "1/"], (1 /))
-    , (["neg"], negate)
-    , (["signum", "sgn", "sign"], signum)
-    , (["abs", "||"], abs)
-    , (["sqrt", "v"], sqrt)
+    [ (["sin", "s"], sin),
+      (["cos", "c"], cos),
+      (["tan", "t"], tan),
+      (["sinh", "sh"], sinh),
+      (["cosh", "ch"], cosh),
+      (["tanh", "th"], tanh),
+      (["atan"], atan),
+      (["acos"], acos),
+      (["asin"], asin),
+      (["exp"], exp),
+      (["atanh"], atanh),
+      (["acosh"], acosh),
+      (["asinh"], asinh),
+      (["exp"], exp),
+      (["ln", "log"], log),
+      (["deg", "todegrees"], toDegrees),
+      (["rad", "toradians"], toRadians),
+      (["factorial", "fact", "!"], factorial),
+      (["inv", "1/"], (1 /)),
+      (["neg"], negate),
+      (["signum", "sgn", "sign"], signum),
+      (["abs", "||"], abs),
+      (["sqrt", "v"], sqrt)
     ]
 
 toDegrees :: Double -> Double
@@ -111,7 +110,7 @@ constants =
 operators :: Map.Map String Operator
 operators =
   Map.fromList $
-  concat [constants, unaryOperators, binaryOperators, foldOperators]
+    concat [constants, unaryOperators, binaryOperators, foldOperators]
 
 isOperator :: String -> Bool
 isOperator = (`Map.member` operators)
@@ -119,8 +118,8 @@ isOperator = (`Map.member` operators)
 evalOperator :: Operator -> Computation ()
 evalOperator op
   | arity >= 0 = do
-    args <- pop arity
-    unless (length args < arity) (push $ action args)
+      args <- pop arity
+      unless (length args < arity) (push $ action args)
   | otherwise = modify $ smap (pure . action)
   where
     action = action_ op
@@ -129,6 +128,6 @@ evalOperator op
 handleOperator :: String -> Computation ()
 handleOperator opName = doOperator foundOp
   where
-    doOperator Nothing   = error ("Operator " ++ opName ++ " not found.")
+    doOperator Nothing = error ("Operator " ++ opName ++ " not found.")
     doOperator (Just op) = evalOperator op
     foundOp = Map.lookup opName operators

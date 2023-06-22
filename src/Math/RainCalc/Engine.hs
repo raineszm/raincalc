@@ -1,19 +1,22 @@
 module Math.RainCalc.Engine where
 
-import           Control.Applicative        (liftA2, liftA3)
-import           Control.Monad.State.Strict (runState)
-import           Data.Bool                  (bool)
-import           Data.Char                  (toLower)
-import           System.Console.Haskeline   (InputT, defaultSettings,
-                                             getInputLine, outputStrLn,
-                                             runInputT)
-
-import qualified Math.RainCalc.Command      as Cmd
-import qualified Math.RainCalc.Computation  as C
-import qualified Math.RainCalc.Modifier     as Mod
-import qualified Math.RainCalc.Numbers      as N
-import qualified Math.RainCalc.Operator     as Op
-import qualified Math.RainCalc.RPNState     as S
+import Control.Applicative (liftA2, liftA3)
+import Control.Monad.State.Strict (runState)
+import Data.Bool (bool)
+import Data.Char (toLower)
+import qualified Math.RainCalc.Command as Cmd
+import qualified Math.RainCalc.Computation as C
+import qualified Math.RainCalc.Modifier as Mod
+import qualified Math.RainCalc.Numbers as N
+import qualified Math.RainCalc.Operator as Op
+import qualified Math.RainCalc.RPNState as S
+import System.Console.Haskeline
+  ( InputT,
+    defaultSettings,
+    getInputLine,
+    outputStrLn,
+    runInputT,
+  )
 
 version :: String
 version = "0.1.0.0"
@@ -39,8 +42,8 @@ mainLoop state =
 
 processLine :: S.RPNState -> String -> InputT IO S.RPNState
 processLine state line =
-  doOutput (processLine_ $ map toLower line) state >>=
-  liftA3 bool mainLoop return S.terminate_
+  doOutput (processLine_ $ map toLower line) state
+    >>= liftA3 bool mainLoop return S.terminate_
 
 processLine_ :: String -> C.Computation String
 processLine_ line =

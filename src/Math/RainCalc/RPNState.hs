@@ -1,27 +1,28 @@
 {-# LANGUAGE LambdaCase #-}
 
 module Math.RainCalc.RPNState
-  ( RPNState(..)
-  , emptyState
-  , smap
-  , rmap
-  , formatStack
-  , displayState
-  , swap_
-  , stackSize
-  , push_
-  , dup_
-  , clear_
-  ) where
+  ( RPNState (..),
+    emptyState,
+    smap,
+    rmap,
+    formatStack,
+    displayState,
+    swap_,
+    stackSize,
+    push_,
+    dup_,
+    clear_,
+  )
+where
 
-import           Data.List (mapAccumL)
-import qualified Data.Map  as Map
+import Data.List (mapAccumL)
+import qualified Data.Map as Map
 
 data RPNState = RPNState
-  { stack_     :: [Double]
-  , registers_ :: Map.Map Char Double
-  , modifier_  :: Maybe String
-  , terminate_ :: Bool
+  { stack_ :: [Double],
+    registers_ :: Map.Map Char Double,
+    modifier_ :: Maybe String,
+    terminate_ :: Bool
   }
 
 formatStack :: [Double] -> String
@@ -39,10 +40,10 @@ displayState = formatStack . stack_
 emptyState :: RPNState
 emptyState =
   RPNState
-    { stack_ = []
-    , registers_ = Map.empty
-    , modifier_ = Nothing
-    , terminate_ = False
+    { stack_ = [],
+      registers_ = Map.empty,
+      modifier_ = Nothing,
+      terminate_ = False
     }
 
 stackSize :: RPNState -> Int
@@ -61,12 +62,12 @@ dup_ :: RPNState -> RPNState
 dup_ =
   smap $ \case
     [] -> []
-    stk@(x:_) -> x : stk
+    stk@(x : _) -> x : stk
 
 swap_ :: RPNState -> RPNState
 swap_ =
   smap $ \case
-    (x:y:xs) -> y : x : xs
+    (x : y : xs) -> y : x : xs
     xs -> xs
 
 clear_ :: RPNState -> RPNState

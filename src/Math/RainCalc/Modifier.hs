@@ -1,33 +1,37 @@
 {-# LANGUAGE LambdaCase #-}
 
 module Math.RainCalc.Modifier
-  ( triggerModifier
-  , cleanupModifiers
-  , armModifier
-  , isModifier
-  , isArmed
-  ) where
+  ( triggerModifier,
+    cleanupModifiers,
+    armModifier,
+    isModifier,
+    isArmed,
+  )
+where
 
-import           Control.Monad             ((>=>))
-import           Control.Monad.State.Lazy  (gets, modify)
-import           Data.List                 (stripPrefix)
-import qualified Data.Map                  as Map
-import           Data.Maybe                (fromJust, fromMaybe, isJust,
-                                            isNothing)
-import           Numeric                   (readHex)
-
-import           Math.RainCalc.Classes
-import           Math.RainCalc.Command     (commands, isCommand)
-import           Math.RainCalc.Computation (Computation, pop, push)
-import           Math.RainCalc.Operator    (isOperator, operators)
-import qualified Math.RainCalc.Registers   as Reg
-import           Math.RainCalc.RPNState    (RPNState, modifier_)
-import           Math.RainCalc.Utils
+import Control.Monad ((>=>))
+import Control.Monad.State.Lazy (gets, modify)
+import Data.List (stripPrefix)
+import qualified Data.Map as Map
+import Data.Maybe
+  ( fromJust,
+    fromMaybe,
+    isJust,
+    isNothing,
+  )
+import Math.RainCalc.Classes
+import Math.RainCalc.Command (commands, isCommand)
+import Math.RainCalc.Computation (Computation, pop, push)
+import Math.RainCalc.Operator (isOperator, operators)
+import Math.RainCalc.RPNState (RPNState, modifier_)
+import qualified Math.RainCalc.Registers as Reg
+import Math.RainCalc.Utils
+import Numeric (readHex)
 
 data Modifier = Modifier
-  { action_ :: String -> Computation String
-  , solo_   :: Computation String
-  , help_   :: String
+  { action_ :: String -> Computation String,
+    solo_ :: Computation String,
+    help_ :: String
   }
 
 instance Documented Modifier where
@@ -36,17 +40,17 @@ instance Documented Modifier where
 help :: Modifier
 help =
   Modifier
-    { action_ = helpAction
-    , solo_ = soloHelpAction
-    , help_ = "Displays help information"
+    { action_ = helpAction,
+      solo_ = soloHelpAction,
+      help_ = "Displays help information"
     }
 
 soloHelpAction :: Computation String
 soloHelpAction = (return . unlines) outLines
   where
     outLines =
-      header :
-      map doWrap [Map.keys operators, Map.keys commands, Map.keys modifiers]
+      header
+        : map doWrap [Map.keys operators, Map.keys commands, Map.keys modifiers]
     header = "Available Commands: "
     doWrap = wrapLine 60 . unwords
 
@@ -68,9 +72,9 @@ formatHelp key objs = "Help for " ++ key ++ ":\n" ++ getHelp obj
 hex :: Modifier
 hex =
   Modifier
-    { action_ = hexAction
-    , solo_ = return "Invalid use of x:, no number supplied"
-    , help_ = "Read next input as a hex sequence."
+    { action_ = hexAction,
+      solo_ = return "Invalid use of x:, no number supplied",
+      help_ = "Read next input as a hex sequence."
     }
 
 hexAction :: String -> Computation String
@@ -79,15 +83,15 @@ hexAction tok =
     then push num >> return ""
     else return $ "Invalid hex sequence: " ++ tok
   where
-    ((num, rest):_) = readHex digits
+    ((num, rest) : _) = readHex digits
     digits = fromMaybe tok $ stripPrefix "0x" tok
 
 toRegister :: Modifier
 toRegister =
   Modifier
-    { action_ = toRegisterAction
-    , solo_ = soloRegisterAction
-    , help_ = "Pops the top of the stack to the specified register."
+    { action_ = toRegisterAction,
+      solo_ = soloRegisterAction,
+      help_ = "Pops the top of the stack to the specified register."
     }
 
 soloRegisterAction :: Computation String
@@ -96,27 +100,27 @@ soloRegisterAction = return "No register supplied."
 toRegisterAction :: String -> Computation String
 toRegisterAction [c]
   | Reg.isValid c =
-    pop 1 >>= \case
-      [x] -> Reg.setR c x >> return ""
-      _ -> return "Error: Empty stack"
+      pop 1 >>= \case
+        [x] -> Reg.setR c x >> return ""
+        _ -> return "Error: Empty stack"
   | otherwise = return $ "Invalid register: " ++ [c]
 toRegisterAction s = return $ "Invalid register name: " ++ s
 
 fromRegister :: Modifier
 fromRegister =
   Modifier
-    { action_ = fromRegisterAction
-    , solo_ = soloRegisterAction
-    , help_ = "Pushes the value of the specified register to the stack."
+    { action_ = fromRegisterAction,
+      solo_ = soloRegisterAction,
+      help_ = "Pushes the value of the specified register to the stack."
     }
 
 fromRegisterAction :: String -> Computation String
 fromRegisterAction [c]
   | Reg.isValid c = do
-    fetched <- Reg.getR c
-    if isNothing fetched
-      then return ("Tried to fetch unset register " ++ [c])
-      else push (fromJust fetched) >> return ""
+      fetched <- Reg.getR c
+      if isNothing fetched
+        then return ("Tried to fetch unset register " ++ [c])
+        else push (fromJust fetched) >> return ""
   | otherwise = return $ "Invalid register: " ++ [c]
 fromRegisterAction s = return $ "Invalid register name: " ++ s
 
@@ -126,12 +130,12 @@ isModifier = (`Map.member` modifiers)
 modifiers :: Map.Map String Modifier
 modifiers =
   Map.fromList $
-  expand
-    [ (["?", ".?", ".h", ".help"], help)
-    , (["x:"], hex)
-    , (["->"], toRegister)
-    , (["<-"], fromRegister)
-    ]
+    expand
+      [ (["?", ".?", ".h", ".help"], help),
+        (["x:"], hex),
+        (["->"], toRegister),
+        (["<-"], fromRegister)
+      ]
 
 armModifier :: String -> Computation ()
 armModifier modName = modify $ \state -> state {modifier_ = Just modName}

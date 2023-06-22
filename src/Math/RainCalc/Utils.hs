@@ -1,15 +1,16 @@
 {-# LANGUAGE TupleSections #-}
 
 module Math.RainCalc.Utils
-  ( expandWith
-  , expand
-  , wrapLine
-  ) where
+  ( expandWith,
+    expand,
+    wrapLine,
+  )
+where
 
 expandWith :: ([String] -> a -> b) -> [([String], a)] -> [(String, b)]
 expandWith f = foldMap alias
   where
-    alias (names, x) = map (, f names x) names
+    alias (names, x) = map (,f names x) names
 
 expand :: [([String], a)] -> [(String, a)]
 expand = expandWith $ const id
@@ -25,7 +26,7 @@ doWrap n (acc, text) = doWrap n (acc ++ ('\n' : unwords nextLine), rest)
 
 wrapLine' :: Int -> (Int, [String], [String]) -> ([String], [String])
 wrapLine' _ (_, y, []) = (y, [])
-wrapLine' n (i, y, rest@(x:xs))
+wrapLine' n (i, y, rest@(x : xs))
   | newlength < n = wrapLine' n (newlength, y ++ [x], xs)
   | otherwise = (y, rest)
   where

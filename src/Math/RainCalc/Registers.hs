@@ -1,11 +1,10 @@
 module Math.RainCalc.Registers where
 
-import           Control.Monad.State.Lazy
-import           Data.Char                 (isAlpha, toLower)
-import qualified Data.Map                  as Map
-
+import Control.Monad.State.Lazy
+import Data.Char (isAlpha, toLower)
+import qualified Data.Map as Map
 import qualified Math.RainCalc.Computation as C
-import qualified Math.RainCalc.RPNState    as S
+import qualified Math.RainCalc.RPNState as S
 
 setR :: Char -> Double -> C.Computation ()
 setR r = modify . setR_ r
