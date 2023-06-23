@@ -8,9 +8,9 @@ Raincalc is a simple stack-based Reverse Polish Notation (RPN) calculator.
 Raincalc can be installed by cloning this repo and building with cabal
 
 ```bash
-  git clone git@github.com:raineszm/raincalc.git
-  cd raincalc
-  cabal install
+git clone git@github.com:raineszm/raincalc.git
+cd raincalc
+cabal install
 ```
 
 ## Running Tests
@@ -18,7 +18,7 @@ Raincalc can be installed by cloning this repo and building with cabal
 To run tests, run the following command
 
 ```bash
-  cabal v2-tests
+cabal v2-tests
 ```
 
 ## Usage/Examples
