@@ -1,71 +1,78 @@
-cabal-version: 1.12
+cabal-version: 3.4
+name: raincalc
+version: 0.1.1.0
+synopsis: A simple rpn calculator in Haskell
+description: raincalc provides a line oriented interface to a stack based RPN calculator
+category: Math
+author: Zach Raines
+maintainer: dev@zmraines.com
+license: GPL-3.0-or-later
+license-file: LICENSE
 
--- This file has been generated from package.yaml by hpack version 0.34.4.
---
--- see: https://github.com/sol/hpack
---
--- hash: 998f21b5b5d660096f89b1cdc4ab0d4442a4eafeed8c4c1bc8c26a1bee80ea79
+source-repository head
+  type: git
+  location: https://github.com/raineszm/raincalc.git
 
-name:           raincalc
-version:        0.1.0.0
-synopsis:       A simple rpn calculator in Haskell.
-category:       Math
-author:         Zach Raines
-maintainer:     raineszm+raincalc@gmail.com
-license:        GPL-3
-license-file:   LICENSE
-build-type:     Simple
+common common-flags
+  default-language: GHC2024
 
 library
+  import: common-flags
   hs-source-dirs:
-      src/
+    src/
+
   build-depends:
-      base ==4.*
-    , containers
-    , haskeline
-    , mtl
-    , regex-pcre-builtin
+    base ==4.*,
+    containers,
+    haskeline,
+    mtl,
+    regex-pcre-builtin,
+
   exposed-modules:
-      Math.RainCalc.Classes
-      Math.RainCalc.Command
-      Math.RainCalc.Computation
-      Math.RainCalc.Engine
-      Math.RainCalc.Modifier
-      Math.RainCalc.Numbers
-      Math.RainCalc.Operator
-      Math.RainCalc.Registers
-      Math.RainCalc.RPNState
-      Math.RainCalc.Utils
-  default-language: Haskell2010
+    Math.RainCalc.Classes
+    Math.RainCalc.Command
+    Math.RainCalc.Computation
+    Math.RainCalc.Engine
+    Math.RainCalc.Modifier
+    Math.RainCalc.Numbers
+    Math.RainCalc.Operator
+    Math.RainCalc.Registers
+    Math.RainCalc.RPNState
+    Math.RainCalc.Utils
 
 executable raincalc
+  import: common-flags
   main-is: Main.hs
   hs-source-dirs:
-      src-exec/
+    src-exec/
+
   build-depends:
-      base ==4.*
-    , raincalc
-  default-language: Haskell2010
+    base ==4.*,
+    raincalc,
 
 test-suite spec
+  import: common-flags
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   hs-source-dirs:
-      test
-  ghc-options: -Wall -Werror
+    test
+
+  ghc-options:
+    -Wall
+
   build-depends:
-      QuickCheck >=2.0
-    , base ==4.*
-    , hspec >=1.3
-    , mtl
-    , raincalc
-  build-tool-depends: hspec-discover:hspec-discover == 2.*
+    base ==4.*,
+    hspec >=1.3,
+    mtl,
+    QuickCheck >=2.0,
+    raincalc,
+
+  build-tool-depends: hspec-discover:hspec-discover >=2 && <3
   other-modules:
-      Math.RainCalc.ComputationSpec
-      Math.RainCalc.EngineSpec
-      Math.RainCalc.NumbersSpec
-      Math.RainCalc.OperatorSpec
-      Math.RainCalc.RegistersSpec
-      Math.RainCalc.RPNStateSpec
-      Math.RainCalc.TestHelper
-  default-language: Haskell2010
+    Math.RainCalc.ComputationSpec
+    Math.RainCalc.EngineSpec
+    Math.RainCalc.NumbersSpec
+    Math.RainCalc.OperatorSpec
+    Math.RainCalc.RegistersSpec
+    Math.RainCalc.RPNStateSpec
+    Math.RainCalc.TestHelper
