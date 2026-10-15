@@ -37,6 +37,7 @@ library
     Math.RainCalc.Modifier
     Math.RainCalc.Numbers
     Math.RainCalc.Operator
+    Math.RainCalc.Output
     Math.RainCalc.Registers
     Math.RainCalc.RPNState
     Math.RainCalc.Utils

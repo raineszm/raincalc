@@ -1,3 +1,5 @@
+{-# LANGUAGE LambdaCase #-}
+
 module Math.RainCalc.Command
   ( isCommand,
     handleCommand,
@@ -5,8 +7,10 @@ module Math.RainCalc.Command
   )
 where
 
+import Control.Applicative ((<**>))
 import Control.Monad.State.Lazy
-import qualified Data.Map as Map
+import Data.Functor (($>), (<&>))
+import Data.Map qualified as Map
 import Math.RainCalc.Classes
 import Math.RainCalc.Computation
   ( Computation,
@@ -16,12 +20,13 @@ import Math.RainCalc.Computation
     swap,
     terminate,
   )
+import Math.RainCalc.Output (Output (..), renderOutput)
 import Math.RainCalc.RPNState (displayState)
 import Math.RainCalc.Registers (present)
 import Math.RainCalc.Utils
 
 data Command = Command
-  { action_ :: Computation String,
+  { action_ :: Computation Output,
     help_ :: String
   }
 
@@ -31,12 +36,9 @@ instance Documented Command where
 printStack :: Command
 printStack =
   Command
-    { action_ = printStackAction,
+    { action_ = pure PrintStack,
       help_ = "Prints the stack to the screen."
     }
-
-printStackAction :: Computation String
-printStackAction = gets displayState
 
 popStack :: Command
 popStack =
@@ -45,39 +47,32 @@ popStack =
       help_ = "Pops and presents the top of the stack."
     }
 
-popStackAction :: Computation String
-popStackAction = do
-  popped <- pop 1
-  return $
-    case popped of
-      [] -> "Empty Stack."
-      [x] -> show x
-
-silent :: Computation a -> Computation String
-silent = (>> return "")
+popStackAction :: Computation Output
+popStackAction =
+  pop 1
+    <&> \case
+      [] -> Silent
+      [x] -> Value x
 
 quitCommand :: Command
-quitCommand = Command {action_ = silent terminate, help_ = "Quits the program."}
+quitCommand = Command {action_ = terminate $> Silent, help_ = "Quits the program."}
 
 dupCommand :: Command
-dupCommand = Command {action_ = silent dup, help_ = "[ ... x ] -> [ ... x, x ]"}
+dupCommand = Command {action_ = dup $> Silent, help_ = "[ ... x ] -> [ ... x, x ]"}
 
 swapCommand :: Command
 swapCommand =
-  Command {action_ = silent swap, help_ = "[ ... x, y ] -> [ ... y, x ]"}
+  Command {action_ = swap $> Silent, help_ = "[ ... x, y ] -> [ ... y, x ]"}
 
 clearCommand :: Command
-clearCommand = Command {action_ = silent clear, help_ = "[ ... ] -> []"}
+clearCommand = Command {action_ = clear $> Silent, help_ = "[ ... ] -> []"}
 
 printRegisters :: Command
 printRegisters =
   Command
-    { action_ = printRegisterAction,
+    { action_ = pure PrintRegisters,
       help_ = "Prints the set registers to the screen."
     }
-
-printRegisterAction :: Computation String
-printRegisterAction = ("REGISTERS:\n" ++) <$> gets present
 
 commands :: Map.Map String Command
 commands =
@@ -96,6 +91,6 @@ isCommand :: String -> Bool
 isCommand tok = Map.member tok commands
 
 handleCommand :: String -> Computation String
-handleCommand tok = action_ foundCmd
+handleCommand tok = renderOutput =<< action_ foundCmd
   where
     ~(Just foundCmd) = Map.lookup tok commands
