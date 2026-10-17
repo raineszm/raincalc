@@ -1,6 +1,8 @@
 module Math.RainCalc.OperatorSpec (spec) where
 
 import Control.Applicative ()
+import Data.Map.Strict qualified as Map
+import Data.Maybe (fromJust)
 import Math.RainCalc.Operator
 import Math.RainCalc.TestHelper
 import Test.Hspec
@@ -12,6 +14,9 @@ spec = describe "Operator" $ do
   argumentCountingSpec
   arithmeticSpec
 
+getOp :: String -> Operator
+getOp op = fromJust $ Map.lookup op operators
+
 argumentCountingSpec :: Spec
 argumentCountingSpec =
   describe "Argument counting" $
@@ -19,7 +24,7 @@ argumentCountingSpec =
       cases `shouldSatisfy` all test
   where
     test (stack, op, result) =
-      runOnStack (handleOperator op) stack == result
+      runOnStack (evalOperator $ getOp op) stack == result
     cases =
       [ ([1, 2], "+", [3]),
         ([1, 2, 3, 4], "sum", [10]),
@@ -33,7 +38,7 @@ arithmeticSpec =
       cases `shouldSatisfy` all test
   where
     test (stack, op, result) =
-      runOnStack (handleOperator op) stack == result
+      runOnStack (evalOperator $ getOp op) stack == result
     cases =
       [ ([1, 2, 4], "+", [3, 4]),
         ([1, 2, 4], "-", [1, 4]),

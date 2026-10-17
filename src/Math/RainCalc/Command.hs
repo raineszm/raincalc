@@ -1,8 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 
 module Math.RainCalc.Command
-  ( isCommand,
-    handleCommand,
+  ( Command (..),
     commands,
   )
 where
@@ -86,11 +85,3 @@ commands =
         (["clear"], clearCommand),
         ([".r", ".reg", "registers"], printRegisters)
       ]
-
-isCommand :: String -> Bool
-isCommand tok = Map.member tok commands
-
-handleCommand :: String -> Computation Output
-handleCommand tok = action_ foundCmd
-  where
-    ~(Just foundCmd) = Map.lookup tok commands

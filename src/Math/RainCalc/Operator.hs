@@ -1,14 +1,14 @@
 module Math.RainCalc.Operator
   ( operators,
-    isOperator,
-    handleOperator,
+    evalOperator,
+    Operator (..),
   )
 where
 
 import Control.Monad (unless)
 import Control.Monad.State.Lazy (modify)
 import Data.List (intercalate)
-import qualified Data.Map as Map
+import Data.Map qualified as Map
 import Math.RainCalc.Classes
 import Math.RainCalc.Computation (Computation, pop, push)
 import Math.RainCalc.RPNState (smap)
@@ -124,10 +124,3 @@ evalOperator op
   where
     action = action_ op
     arity = arity_ op
-
-handleOperator :: String -> Computation ()
-handleOperator opName = doOperator foundOp
-  where
-    doOperator Nothing = error ("Operator " ++ opName ++ " not found.")
-    doOperator (Just op) = evalOperator op
-    foundOp = Map.lookup opName operators
