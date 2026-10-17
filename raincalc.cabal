@@ -32,10 +32,10 @@ library
   exposed-modules:
     Math.RainCalc.Actions
     Math.RainCalc.CalcError
-    Math.RainCalc.Classes
     Math.RainCalc.Command
     Math.RainCalc.Computation
     Math.RainCalc.Engine
+    Math.RainCalc.Help
     Math.RainCalc.Modifier
     Math.RainCalc.Numbers
     Math.RainCalc.Operator

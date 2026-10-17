@@ -21,7 +21,6 @@ import Data.Maybe
     isNothing,
   )
 import Math.RainCalc.CalcError (CalcError (..))
-import Math.RainCalc.Classes
 import Math.RainCalc.Computation (Computation, pop, push)
 import Math.RainCalc.Operator (operators)
 import Math.RainCalc.Output (Output (..), renderOutput)
@@ -36,41 +35,6 @@ data Modifier = Modifier
     help_ :: String
   }
 
-instance Documented Modifier where
-  getHelp = help_
-
--- help :: Modifier
--- help =
---   Modifier
---     { action_ = helpAction,
---       solo_ = soloHelpAction,
---       help_ = "Displays help information"
---     }
---
--- soloHelpAction :: Computation Output
--- soloHelpAction = (return . Message . unlines) outLines
---   where
---     outLines =
---       header
---         : map doWrap [Map.keys operators, Map.keys commands, Map.keys modifiers]
---     header = "Available Commands: "
---     doWrap = wrapLine 60 . unwords
---
--- helpAction :: String -> Computation Output
--- helpAction cmd
---   | isModifier cmd = Message <$> helpFrom modifiers
---   | isCommand cmd = Message <$> helpFrom commands
---   | isOperator cmd = Message <$> helpFrom operators
---   | otherwise = return . ShowError $ MalformedInput cmd
---   where
---     helpFrom :: (Documented v) => Map.Map String v -> Computation String
---     helpFrom = return . formatHelp cmd
---
--- formatHelp :: (Documented v) => String -> Map.Map String v -> String
--- formatHelp key objs = "Help for " ++ key ++ ":\n" ++ getHelp obj
---   where
---     obj = fromJust $ Map.lookup key objs
---
 hex :: Modifier
 hex =
   Modifier
