@@ -1,15 +1,18 @@
 module Math.RainCalc.Engine where
 
 import Control.Applicative (liftA2, liftA3)
+import Control.Monad ((>=>))
 import Control.Monad.State.Strict (runState)
 import Data.Bool (bool)
 import Data.Char (toLower)
-import qualified Math.RainCalc.Command as Cmd
-import qualified Math.RainCalc.Computation as C
-import qualified Math.RainCalc.Modifier as Mod
-import qualified Math.RainCalc.Numbers as N
-import qualified Math.RainCalc.Operator as Op
-import qualified Math.RainCalc.RPNState as S
+import Math.RainCalc.CalcError (CalcError (MalformedInput))
+import Math.RainCalc.Command qualified as Cmd
+import Math.RainCalc.Computation qualified as C
+import Math.RainCalc.Modifier qualified as Mod
+import Math.RainCalc.Numbers qualified as N
+import Math.RainCalc.Operator qualified as Op
+import Math.RainCalc.Output (Output (..), renderOutput)
+import Math.RainCalc.RPNState qualified as S
 import System.Console.Haskeline
   ( InputT,
     defaultSettings,
@@ -49,22 +52,22 @@ processLine_ :: String -> C.Computation String
 processLine_ line =
   liftA2
     (++)
-    (concat <$> traverse processToken (words line))
-    Mod.cleanupModifiers
+    (concat <$> traverse (processToken >=> renderOutput) (words line))
+    (renderOutput =<< Mod.cleanupModifiers)
 
 doOutput :: C.Computation String -> S.RPNState -> InputT IO S.RPNState
 doOutput comp oldState =
   let (out, newState) = runState comp oldState
    in newState <$ outputStrLn out
 
-processToken :: String -> C.Computation String
+processToken :: String -> C.Computation Output
 processToken tok =
   Mod.isArmed >>= bool (processToken_ tok) (Mod.triggerModifier tok)
 
-processToken_ :: String -> C.Computation String
+processToken_ :: String -> C.Computation Output
 processToken_ tok
-  | Mod.isModifier tok = "" <$ Mod.armModifier tok
-  | Op.isOperator tok = "" <$ Op.handleOperator tok
+  | Mod.isModifier tok = Mod.armModifier tok *> pure Silent
+  | Op.isOperator tok = Op.handleOperator tok *> pure Silent
   | Cmd.isCommand tok = Cmd.handleCommand tok
-  | N.isNumber tok = "" <$ N.handleNumber tok
-  | otherwise = return $ "Unrecognized sequence \"" ++ tok ++ "\""
+  | N.isNumber tok = N.handleNumber tok *> pure Silent
+  | otherwise = return . ShowError $ MalformedInput tok

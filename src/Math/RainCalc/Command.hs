@@ -90,7 +90,7 @@ commands =
 isCommand :: String -> Bool
 isCommand tok = Map.member tok commands
 
-handleCommand :: String -> Computation String
-handleCommand tok = renderOutput =<< action_ foundCmd
+handleCommand :: String -> Computation Output
+handleCommand tok = action_ foundCmd
   where
     ~(Just foundCmd) = Map.lookup tok commands

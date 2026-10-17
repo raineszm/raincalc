@@ -158,16 +158,14 @@ doAction :: String -> Maybe Modifier -> Computation Output
 doAction tok =
   maybe (return . Message $ "Somehow a modifier became undefined") (`action_` tok)
 
-triggerModifier :: String -> Computation String
-triggerModifier tok =
-  renderOutput =<< do
-    mod <- takeModifier
-    doAction tok mod
+triggerModifier :: String -> Computation Output
+triggerModifier tok = do
+  mod <- takeModifier
+  doAction tok mod
 
-cleanupModifiers :: Computation String
-cleanupModifiers =
-  renderOutput =<< do
-    mod <- takeModifier
-    case mod of
-      Nothing -> return Silent
-      Just mod' -> solo_ mod'
+cleanupModifiers :: Computation Output
+cleanupModifiers = do
+  mod <- takeModifier
+  case mod of
+    Nothing -> return Silent
+    Just mod' -> solo_ mod'
