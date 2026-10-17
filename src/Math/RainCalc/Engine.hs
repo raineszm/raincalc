@@ -24,7 +24,7 @@ import System.Console.Haskeline
 version :: String
 version = "0.1.0.0"
 
-defaultMain :: IO S.RPNState
+defaultMain :: IO ()
 defaultMain =
   runInputT defaultSettings $ do
     outputStrLn "--------------------------------"
@@ -39,26 +39,24 @@ prompt state = "raincalc[s:" ++ size ++ "]> "
   where
     size = show $ S.stackSize state
 
-mainLoop :: S.RPNState -> InputT IO S.RPNState
+mainLoop :: S.RPNState -> InputT IO ()
 mainLoop state =
-  getInputLine (prompt state) >>= maybe (return state) (processLine state)
+  getInputLine (prompt state) >>= maybe (return ()) (processLine state)
 
-processLine :: S.RPNState -> String -> InputT IO S.RPNState
-processLine state line =
-  doOutput (processLine_ $ map toLower line) state
-    >>= liftA3 bool mainLoop return S.terminate_
+processLine :: S.RPNState -> String -> InputT IO ()
+processLine state line = do
+  let computation = processLine_ $ map toLower line
+  let (out, state) = runState computation state
+  outputStrLn out
+  if S.terminate_ state
+    then return ()
+    else mainLoop state
 
 processLine_ :: String -> C.Computation String
-processLine_ line =
-  liftA2
-    (++)
-    (concat <$> traverse (processToken >=> renderOutput) (words line))
-    (renderOutput =<< Mod.cleanupModifiers)
-
-doOutput :: C.Computation String -> S.RPNState -> InputT IO S.RPNState
-doOutput comp oldState =
-  let (out, newState) = runState comp oldState
-   in newState <$ outputStrLn out
+processLine_ line = do
+  output <- traverse (processToken >=> renderOutput) (words line)
+  modOutput <- Mod.cleanupModifiers >>= renderOutput
+  return $ concat output ++ modOutput
 
 processToken :: String -> C.Computation Output
 processToken tok =
