@@ -83,7 +83,7 @@ hexAction :: String -> Computation Output
 hexAction tok =
   if null rest
     then push num >> return Silent
-    else return $ Message $ "Invalid hex sequence: " ++ tok
+    else return . ShowError . MalformedInput $ "Invalid hex sequence: " ++ tok
   where
     ((num, rest) : _) = readHex digits
     digits = fromMaybe tok $ stripPrefix "0x" tok
@@ -145,22 +145,29 @@ armModifier modName = modify $ \state -> state {modifier_ = Just modName}
 disarmModifier :: Computation ()
 disarmModifier = modify $ \state -> state {modifier_ = Nothing}
 
-isArmed_ :: RPNState -> Bool
-isArmed_ = isJust . modifier_
-
 isArmed :: Computation Bool
-isArmed = gets isArmed_
+isArmed = gets $ isJust . modifier_
 
 activeModifier :: RPNState -> Maybe Modifier
 activeModifier = modifier_ >=> (`Map.lookup` modifiers)
 
-doAction :: String -> Maybe Modifier -> Computation String
+takeModifier :: Computation (Maybe Modifier)
+takeModifier = gets activeModifier <* disarmModifier
+
+doAction :: String -> Maybe Modifier -> Computation Output
 doAction tok =
-  maybe (return "Somehow a modifier became undefined") (renderOutput <=< (`action_` tok))
+  maybe (return . Message $ "Somehow a modifier became undefined") (`action_` tok)
 
 triggerModifier :: String -> Computation String
-triggerModifier tok = gets activeModifier <* disarmModifier >>= doAction tok
+triggerModifier tok =
+  renderOutput =<< do
+    mod <- takeModifier
+    doAction tok mod
 
 cleanupModifiers :: Computation String
 cleanupModifiers =
-  gets activeModifier <* disarmModifier >>= maybe (return "") (renderOutput <=< solo_)
+  renderOutput =<< do
+    mod <- takeModifier
+    case mod of
+      Nothing -> return Silent
+      Just mod' -> solo_ mod'

@@ -22,4 +22,4 @@ renderOutput PrintStack = gets displayState
 renderOutput PrintRegisters = ("REGISTERS:\n" ++) <$> gets present
 
 renderError :: CalcError -> Computation String
-renderError _ = ""
+renderError _ = return ""
