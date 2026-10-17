@@ -30,6 +30,7 @@ library
     regex-pcre-builtin ^>=0.95.2.3.8.44,
 
   exposed-modules:
+    Math.RainCalc.CalcError
     Math.RainCalc.Classes
     Math.RainCalc.Command
     Math.RainCalc.Computation
