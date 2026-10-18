@@ -15,15 +15,10 @@ binaryOperator f = Operator{arity = 2, runOp = action}
   where
     action ~[x, y] = y `f` x
 
-map2nd :: (b -> c) -> [(a, b)] -> [(a, c)]
-map2nd f = map g
-  where
-    g (x, y) = (x, f y)
-
 binaryOperators :: [([String], Operator)]
 binaryOperators =
-    map2nd
-        binaryOperator
+    map
+        (fmap binaryOperator)
         [ (["+"], (+))
         , (["-"], (-))
         , (["/"], (/))
@@ -40,8 +35,8 @@ unaryOperator f = buildOperator 1 (f . head)
 
 unaryOperators :: [([String], Operator)]
 unaryOperators =
-    map2nd
-        unaryOperator
+    map
+        (fmap unaryOperator)
         [ (["sin", "s"], sin)
         , (["cos", "c"], cos)
         , (["tan", "t"], tan)
@@ -81,11 +76,11 @@ factorial n
 
 foldOperators :: [([String], Operator)]
 foldOperators =
-    map2nd (buildOperator (-1)) [(["sum"], sum), (["prod"], product)]
+    map (fmap $ buildOperator (-1)) [(["sum"], sum), (["prod"], product)]
 
 constants :: [([String], Operator)]
 constants =
-    map2nd (buildOperator 0) [(["e"], const (exp 1)), (["pi"], const pi)]
+    map (fmap $ buildOperator 0) [(["e"], const (exp 1)), (["pi"], const pi)]
 
 operators :: [([String], Operator)]
 operators =
