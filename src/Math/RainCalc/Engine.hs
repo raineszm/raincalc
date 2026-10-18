@@ -6,7 +6,7 @@ import Control.Monad.State.Strict (runState)
 import Data.Bool (bool)
 import Data.Char (toLower)
 import Data.Map.Strict qualified as Map
-import Math.RainCalc.Action (ActionEntry (..), Command (runCmd))
+import Math.RainCalc.Action (ActionEntry (..))
 import Math.RainCalc.CalcError (CalcError (MalformedInput))
 import Math.RainCalc.Command qualified as Cmd
 import Math.RainCalc.Computation qualified as C
@@ -14,7 +14,7 @@ import Math.RainCalc.Modifier qualified as Mod
 import Math.RainCalc.Numbers qualified as N
 import Math.RainCalc.Operator (evalOperator)
 import Math.RainCalc.Operator qualified as Op
-import Math.RainCalc.Output (Output (..), renderOutput)
+import Math.RainCalc.Output (Output (..), renderOutput, silent)
 import Math.RainCalc.RPNState qualified as S
 import Math.RainCalc.Registry (actions)
 import System.Console.Haskeline (
@@ -71,10 +71,10 @@ processToken_ tok = do
     do
         let entry = (Map.lookup tok actions)
         case entry of
-            Just (ECommand cmd) -> runCmd cmd
-            Just (EOperator op) -> pure Silent <* Op.evalOperator op
-            Just (EModifier mod) -> pure Silent <* Mod.armModifier tok
+            Just (ECommand cmd) -> cmd
+            Just (EOperator op) -> silent $ Op.evalOperator op
+            Just (EModifier mod) -> silent $ Mod.armModifier tok
             Nothing ->
                 if N.isNumber tok
-                    then N.handleNumber tok *> pure Silent
+                    then silent $ N.handleNumber tok
                     else return . ShowError $ MalformedInput tok

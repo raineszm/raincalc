@@ -7,12 +7,15 @@ import Math.RainCalc.RPNState (displayState)
 import Math.RainCalc.Registers (present)
 
 data Output
-  = Silent
-  | Message String
-  | Value Double
-  | PrintStack
-  | PrintRegisters
-  | ShowError CalcError
+    = Silent
+    | Message String
+    | Value Double
+    | PrintStack
+    | PrintRegisters
+    | ShowError CalcError
+
+silent :: Computation () -> Computation Output
+silent c = c *> pure Silent
 
 renderOutput :: Output -> Computation String
 renderOutput Silent = return ""

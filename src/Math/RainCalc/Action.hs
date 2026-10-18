@@ -3,11 +3,6 @@ module Math.RainCalc.Action where
 import Math.RainCalc.Computation (Computation)
 import Math.RainCalc.Output (Output)
 
-data Command = Command
-    { runCmd :: Computation Output
-    -- , help_ :: String
-    }
-
 data Operator = Operator
     { arity :: Int
     , runOp :: [Double] -> Double
@@ -20,6 +15,6 @@ data Modifier = Modifier
     }
 
 data ActionEntry
-    = ECommand Command
+    = ECommand (Computation Output)
     | EOperator Operator
     | EModifier Modifier

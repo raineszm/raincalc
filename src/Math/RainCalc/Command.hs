@@ -5,11 +5,7 @@ module Math.RainCalc.Command (
 )
 where
 
-import Control.Applicative ((<**>))
-import Control.Monad.State.Lazy
 import Data.Functor (($>), (<&>))
-import Data.Map qualified as Map
-import Math.RainCalc.Action (Command (..))
 import Math.RainCalc.Computation (
     Computation,
     clear,
@@ -18,74 +14,23 @@ import Math.RainCalc.Computation (
     swap,
     terminate,
  )
-import Math.RainCalc.Output (Output (..), renderOutput)
-import Math.RainCalc.RPNState (displayState)
-import Math.RainCalc.Registers (present)
-import Math.RainCalc.Utils
+import Math.RainCalc.Output (Output (..), silent)
 
-printStack :: Command
-printStack =
-    Command
-        { runCmd = pure PrintStack
-        -- , help_ = "Prints the stack to the screen."
-        }
-
-popStack :: Command
+-- "Pops and presents the top of the stack."
+popStack :: Computation Output
 popStack =
-    Command
-        { runCmd = popStackAction
-        -- , help_ = "Pops and presents the top of the stack."
-        }
-
-popStackAction :: Computation Output
-popStackAction =
     pop 1
         <&> \case
             [] -> Silent
             [x] -> Value x
 
-quitCommand :: Command
-quitCommand =
-    Command
-        { runCmd = terminate $> Silent
-        -- help_ = "Quits the program."
-        }
-
-dupCommand :: Command
-dupCommand =
-    Command
-        { runCmd = dup $> Silent
-        -- , help_ = "[ ... x ] -> [ ... x, x ]"
-        }
-
-swapCommand :: Command
-swapCommand =
-    Command
-        { runCmd = swap $> Silent
-        -- help_ = "[ ... x, y ] -> [ ... y, x ]"
-        }
-
-clearCommand :: Command
-clearCommand =
-    Command
-        { runCmd = clear $> Silent
-        -- , help_ = "[ ... ] -> []"
-        }
-
-printRegisters :: Command
-printRegisters =
-    Command
-        { runCmd = pure PrintRegisters
-        -- , help_ = "Prints the set registers to the screen."
-        }
-
-commands :: [([String], Command)]
+commands :: [([String], Computation Output)]
 commands =
-    [ ([".s"], printStack)
+    [ ([".s"], pure PrintStack) -- "Prints the stack to the screen."
     , (["."], popStack)
-    , ([".q", ".quit", "q", "quit"], quitCommand)
-    , (["dup"], dupCommand)
-    , (["swap"], swapCommand)
-    , (["clear"], clearCommand)
-    , ([".r", ".reg", "registers"], printRegisters)
+    , ([".q", ".quit", "q", "quit"], silent terminate) --  "Quits the program."
+    , (["dup"], silent dup) -- , help_ = "[ ... x ] -> [ ... x, x ]"
+    , (["swap"], silent swap) -- help_ = "[ ... x, y ] -> [ ... y, x ]"
+    , (["clear"], silent clear) -- , help_ = "[ ... ] -> []"
+    , ([".r", ".reg", "registers"], pure PrintRegisters) -- "Prints the set registers to the screen."
     ]
