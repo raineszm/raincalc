@@ -1,6 +1,6 @@
 module Math.RainCalc.Registers where
 
-import Control.Monad.State.Lazy
+import Control.Monad.State.Class
 import Data.Char (isAlpha, toLower)
 import Data.Map qualified as Map
 import Math.RainCalc.Computation qualified as C

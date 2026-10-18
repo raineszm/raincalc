@@ -4,8 +4,7 @@ module Math.RainCalc.Operator (
 )
 where
 
-import Control.Monad.RWS.Class (gets)
-import Control.Monad.State.Lazy (modify)
+import Control.Monad.State.Class (gets, modify)
 import Math.RainCalc.Action (Operator (..))
 import Math.RainCalc.CalcError (CalcError (..))
 import Math.RainCalc.Computation (Computation, pop, push)

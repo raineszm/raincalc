@@ -8,7 +8,7 @@ module Math.RainCalc.Modifier (
 )
 where
 
-import Control.Monad.State.Lazy (gets, modify)
+import Control.Monad.State.Class (gets, modify)
 import Data.List (stripPrefix)
 import Data.Maybe (
     fromJust,
