@@ -46,7 +46,6 @@ library
     Math.RainCalc.Registers
     Math.RainCalc.Registry
     Math.RainCalc.RPNState
-    Math.RainCalc.Utils
 
 executable raincalc
   import: common-flags

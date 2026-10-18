@@ -1,30 +1,30 @@
-module Math.RainCalc.Computation
-  ( Computation,
+module Math.RainCalc.Computation (
+    Computation,
     terminate,
     push,
     pop,
     dup,
     swap,
     clear,
-  )
+)
 where
 
 import Control.Monad.State.Strict as StateM
-import qualified Math.RainCalc.RPNState as S
+import Math.RainCalc.RPNState qualified as S
 
 type Computation = StateM.State S.RPNState
 
 terminate :: Computation ()
-terminate = modify $ \state' -> state' {S.terminate_ = True}
+terminate = modify $ \state' -> state'{S.terminate_ = True}
 
 push :: Double -> Computation ()
 push = modify . S.push_
 
 pop :: Int -> Computation [Double]
 pop n = do
-  stack <- gets S.stack_
-  modify $ S.smap (drop n)
-  return $ take n stack
+    stack <- gets S.stack_
+    modify $ S.smap (drop n)
+    return $ take n stack
 
 dup :: Computation ()
 dup = modify S.dup_

@@ -1,7 +1,6 @@
 module Math.RainCalc.Help where
 
 import Data.List (intercalate)
-import Data.Map.Strict qualified as Map
 
 showActions :: [[String]] -> String
 showActions sections = unlines outLines

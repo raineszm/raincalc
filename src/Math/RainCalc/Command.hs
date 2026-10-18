@@ -23,6 +23,7 @@ popStack =
         <&> \case
             [] -> Silent
             [x] -> Value x
+            _ -> error "Pop 1 returned more than one value"
 
 commands :: [([String], Computation Output)]
 commands =

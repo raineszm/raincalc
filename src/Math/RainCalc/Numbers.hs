@@ -1,7 +1,7 @@
-module Math.RainCalc.Numbers
-  ( handleNumber,
+module Math.RainCalc.Numbers (
+    handleNumber,
     isNumber,
-  )
+)
 where
 
 import Math.RainCalc.Computation (Computation, push)

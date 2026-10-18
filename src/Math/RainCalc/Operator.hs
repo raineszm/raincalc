@@ -6,12 +6,9 @@ where
 
 import Control.Monad (unless)
 import Control.Monad.State.Lazy (modify)
-import Data.List (intercalate)
-import Data.Map qualified as Map
 import Math.RainCalc.Action (Operator (..))
 import Math.RainCalc.Computation (Computation, pop, push)
 import Math.RainCalc.RPNState (smap)
-import Math.RainCalc.Utils (expandWith)
 
 binaryOperator :: (Double -> Double -> Double) -> Operator
 binaryOperator f = Operator{arity = 2, runOp = action}
