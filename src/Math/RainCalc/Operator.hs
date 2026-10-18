@@ -10,7 +10,7 @@ import Math.RainCalc.Action (Operator (..))
 import Math.RainCalc.CalcError (CalcError (..))
 import Math.RainCalc.Computation (Computation, pop, push)
 import Math.RainCalc.Output (Output (..), silent)
-import Math.RainCalc.RPNState (RPNState (..), smap)
+import Math.RainCalc.RPNState (RPNState (..))
 
 binaryOperator :: (Double -> Double -> Double) -> Operator
 binaryOperator f = Operator{arity = 2, runOp = action}
@@ -96,12 +96,12 @@ evalOperator :: Operator -> Computation Output
 evalOperator op
     | arity' >= 0 = do
         args <- pop arity'
-        case (action args) of
+        case action args of
             Right result -> silent $ push result
             Left e -> pure $ ShowError e
     | otherwise = do
         stack <- gets stack_
-        case (action stack) of
+        case action stack of
             Right result -> silent . modify $ \r ->
                 r{stack_ = [result]}
             Left e -> pure $ ShowError e
