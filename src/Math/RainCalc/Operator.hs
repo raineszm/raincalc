@@ -34,7 +34,10 @@ buildOperator arity f =
     Operator{arity = arity, runOp = Right . f}
 
 unaryOperator :: (Double -> Double) -> Operator
-unaryOperator f = buildOperator 1 (f . head)
+unaryOperator f = Operator{arity = 1, runOp = action}
+  where
+    action [x] = Right $ f x
+    action _ = Left $ StackUnderflow 1
 
 unaryOperators :: [([String], Operator)]
 unaryOperators =
