@@ -4,3 +4,4 @@ data CalcError
     = MalformedInput String
     | InvalidRegister String
     | EmptyStack
+    | StackUnderflow Int

@@ -4,6 +4,7 @@ module Math.RainCalc.Action where
 
 import Control.Monad.State.Class (state)
 import Control.Monad.State.Strict (State, runState)
+import Math.RainCalc.CalcError (CalcError)
 import Math.RainCalc.Computation (Computation)
 import Math.RainCalc.Output (Output)
 import Math.RainCalc.RPNState (RPNState)
@@ -25,7 +26,7 @@ zoomRPN comp = state $ \s ->
 
 data Operator = Operator
     { arity :: Int
-    , runOp :: [Double] -> Double
+    , runOp :: [Double] -> Either CalcError Double
     }
 
 data Modifier = Modifier

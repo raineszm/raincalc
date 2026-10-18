@@ -4,16 +4,19 @@ module Math.RainCalc.Operator (
 )
 where
 
-import Control.Monad (unless)
+import Control.Monad.RWS.Class (gets)
 import Control.Monad.State.Lazy (modify)
 import Math.RainCalc.Action (Operator (..))
+import Math.RainCalc.CalcError (CalcError (..))
 import Math.RainCalc.Computation (Computation, pop, push)
-import Math.RainCalc.RPNState (smap)
+import Math.RainCalc.Output (Output (..), silent)
+import Math.RainCalc.RPNState (RPNState (..), smap)
 
 binaryOperator :: (Double -> Double -> Double) -> Operator
 binaryOperator f = Operator{arity = 2, runOp = action}
   where
-    action ~[x, y] = y `f` x
+    action [x, y] = Right $ y `f` x
+    action _ = Left $ StackUnderflow 2
 
 binaryOperators :: [([String], Operator)]
 binaryOperators =
@@ -28,7 +31,7 @@ binaryOperators =
 
 buildOperator :: Int -> ([Double] -> Double) -> Operator
 buildOperator arity f =
-    Operator{arity = arity, runOp = f}
+    Operator{arity = arity, runOp = Right . f}
 
 unaryOperator :: (Double -> Double) -> Operator
 unaryOperator f = buildOperator 1 (f . head)
@@ -86,12 +89,19 @@ operators :: [([String], Operator)]
 operators =
     concat [constants, unaryOperators, binaryOperators, foldOperators]
 
-evalOperator :: Operator -> Computation ()
+evalOperator :: Operator -> Computation Output
 evalOperator op
     | arity' >= 0 = do
         args <- pop arity'
-        unless (length args < arity') (push $ action args)
-    | otherwise = modify $ smap (pure . action)
+        case (action args) of
+            Right result -> silent $ push result
+            Left e -> pure $ ShowError e
+    | otherwise = do
+        stack <- gets stack_
+        case (action stack) of
+            Right result -> silent . modify $ \r ->
+                r{stack_ = [result]}
+            Left e -> pure $ ShowError e
   where
     action = runOp op
     arity' = arity op

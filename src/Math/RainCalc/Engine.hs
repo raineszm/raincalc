@@ -73,7 +73,7 @@ processToken_ tok = do
         let entry = Map.lookup tok actions
         case entry of
             Just (ECommand cmd) -> zoomRPN cmd
-            Just (EOperator op) -> silent . zoomRPN $ Op.evalOperator op
+            Just (EOperator op) -> zoomRPN $ Op.evalOperator op
             Just (EModifier mod) -> silent $ Mod.armModifier mod
             Nothing ->
                 if N.isNumber tok
