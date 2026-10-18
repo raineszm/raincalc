@@ -1,34 +1,27 @@
 {-# LANGUAGE LambdaCase #-}
 
 module Math.RainCalc.Modifier (
-    triggerModifier,
+    takeModifier,
     cleanupModifiers,
     armModifier,
-    isArmed,
     modifiers,
 )
 where
 
-import Control.Monad ((<=<), (>=>))
 import Control.Monad.State.Lazy (gets, modify)
 import Data.List (stripPrefix)
-import Data.Map qualified as Map
 import Data.Maybe (
     fromJust,
     fromMaybe,
-    isJust,
     isNothing,
  )
-import GHC.OldList (find)
-import Math.RainCalc.Action (Modifier (..))
+import Math.RainCalc.Action (Modifier (..), Session, SessionState (..), zoomRPN)
 import Math.RainCalc.CalcError (CalcError (..))
 import Math.RainCalc.Computation (Computation, pop, push)
-import Math.RainCalc.Operator (operators)
-import Math.RainCalc.Output (Output (..), renderOutput)
-import Math.RainCalc.RPNState (RPNState, modifier_)
+import Math.RainCalc.Output (Output (..), silent)
 import Math.RainCalc.Registers qualified as Reg
-import Math.RainCalc.Utils
 import Numeric (readHex)
+import Prelude hiding (mod)
 
 hex :: Modifier
 hex =
@@ -62,10 +55,10 @@ toRegisterAction :: String -> Computation Output
 toRegisterAction [c]
     | Reg.isValid c =
         pop 1 >>= \case
-            [x] -> Reg.setR c x >> return Silent
-            _ -> return . ShowError $ EmptyStack
-    | otherwise = return . ShowError $ InvalidRegister [c]
-toRegisterAction s = return . ShowError $ InvalidRegister s
+            [x] -> silent $ Reg.setR c x
+            _ -> pure . ShowError $ EmptyStack
+    | otherwise = pure . ShowError $ InvalidRegister [c]
+toRegisterAction s = pure . ShowError $ InvalidRegister s
 
 fromRegister :: Modifier
 fromRegister =
@@ -93,36 +86,18 @@ modifiers =
     , (["<-"], fromRegister)
     ]
 
-armModifier :: String -> Computation ()
-armModifier modName = modify $ \state -> state{modifier_ = Just modName}
+armModifier :: Modifier -> Session ()
+armModifier mod = modify $ \state -> state{activeModifier = Just mod}
 
-disarmModifier :: Computation ()
-disarmModifier = modify $ \state -> state{modifier_ = Nothing}
+disarmModifier :: Session ()
+disarmModifier = modify $ \state -> state{activeModifier = Nothing}
 
-isArmed :: Computation Bool
-isArmed = gets $ isJust . modifier_
-
-activeModifier :: RPNState -> Maybe Modifier
-activeModifier = modifier_ >=> getMod
-  where
-    getMod name = fmap snd $ find (matches name) modifiers
-    matches name (a, _) = elem name a
-
-takeModifier :: Computation (Maybe Modifier)
+takeModifier :: Session (Maybe Modifier)
 takeModifier = gets activeModifier <* disarmModifier
 
-doAction :: String -> Maybe Modifier -> Computation Output
-doAction tok =
-    maybe (return . Message $ "Somehow a modifier became undefined") (`runMod` tok)
-
-triggerModifier :: String -> Computation Output
-triggerModifier tok = do
-    mod <- takeModifier
-    doAction tok mod
-
-cleanupModifiers :: Computation Output
+cleanupModifiers :: Session Output
 cleanupModifiers = do
     mod <- takeModifier
     case mod of
-        Nothing -> return Silent
-        Just mod' -> runModSolo mod'
+        Nothing -> pure Silent
+        Just mod' -> zoomRPN $ runModSolo mod'

@@ -1,18 +1,13 @@
 module Math.RainCalc.Engine where
 
-import Control.Applicative (liftA2, liftA3)
 import Control.Monad ((>=>))
 import Control.Monad.State.Strict (runState)
-import Data.Bool (bool)
 import Data.Char (toLower)
 import Data.Map.Strict qualified as Map
-import Math.RainCalc.Action (ActionEntry (..))
+import Math.RainCalc.Action (ActionEntry (..), Modifier (runMod), Session, SessionState (..), sessionState, zoomRPN)
 import Math.RainCalc.CalcError (CalcError (MalformedInput))
-import Math.RainCalc.Command qualified as Cmd
-import Math.RainCalc.Computation qualified as C
 import Math.RainCalc.Modifier qualified as Mod
 import Math.RainCalc.Numbers qualified as N
-import Math.RainCalc.Operator (evalOperator)
 import Math.RainCalc.Operator qualified as Op
 import Math.RainCalc.Output (Output (..), renderOutput, silent)
 import Math.RainCalc.RPNState qualified as S
@@ -24,6 +19,7 @@ import System.Console.Haskeline (
     outputStrLn,
     runInputT,
  )
+import Prelude hiding (mod)
 
 version :: String
 version = "0.1.0.0"
@@ -49,32 +45,37 @@ mainLoop state =
 
 processLine :: S.RPNState -> String -> InputT IO ()
 processLine state line = do
-    let computation = processLine_ $ map toLower line
-    let (out, state) = runState computation state
+    let session = processLine_ $ map toLower line
+    let (out, SessionState{rpn = state'}) = runState session (sessionState state)
     outputStrLn out
-    if S.terminate_ state
+    if S.terminate_ state'
         then return ()
-        else mainLoop state
+        else mainLoop state'
 
-processLine_ :: String -> C.Computation String
+processLine_ :: String -> Session String
 processLine_ line = do
-    output <- traverse (processToken >=> renderOutput) (words line)
-    modOutput <- Mod.cleanupModifiers >>= renderOutput
+    output <- traverse (processToken >=> render) (words line)
+    modOutput <- Mod.cleanupModifiers >>= render
     return $ concat output ++ modOutput
+  where
+    render = zoomRPN . renderOutput
 
-processToken :: String -> C.Computation Output
-processToken tok =
-    Mod.isArmed >>= bool (processToken_ tok) (Mod.triggerModifier tok)
+processToken :: String -> Session Output
+processToken tok = do
+    mod <- Mod.takeModifier
+    case mod of
+        Nothing -> processToken_ tok
+        Just mod' -> zoomRPN $ runMod mod' tok
 
-processToken_ :: String -> C.Computation Output
+processToken_ :: String -> Session Output
 processToken_ tok = do
     do
-        let entry = (Map.lookup tok actions)
+        let entry = Map.lookup tok actions
         case entry of
-            Just (ECommand cmd) -> cmd
-            Just (EOperator op) -> silent $ Op.evalOperator op
-            Just (EModifier mod) -> silent $ Mod.armModifier tok
+            Just (ECommand cmd) -> zoomRPN cmd
+            Just (EOperator op) -> silent . zoomRPN $ Op.evalOperator op
+            Just (EModifier mod) -> silent $ Mod.armModifier mod
             Nothing ->
                 if N.isNumber tok
-                    then silent $ N.handleNumber tok
+                    then silent . zoomRPN $ N.handleNumber tok
                     else return . ShowError $ MalformedInput tok

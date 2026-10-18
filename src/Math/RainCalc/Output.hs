@@ -1,6 +1,7 @@
 module Math.RainCalc.Output where
 
 import Control.Monad.State.Class (gets)
+import Data.Functor (($>))
 import Math.RainCalc.CalcError (CalcError)
 import Math.RainCalc.Computation (Computation)
 import Math.RainCalc.RPNState (displayState)
@@ -14,15 +15,16 @@ data Output
     | PrintRegisters
     | ShowError CalcError
 
-silent :: Computation () -> Computation Output
-silent c = c *> pure Silent
+silent :: (Monad m) => m () -> m Output
+silent = ($> Silent)
 
 renderOutput :: Output -> Computation String
-renderOutput Silent = return ""
-renderOutput (Message m) = return m
-renderOutput (Value i) = return $ show i
+renderOutput Silent = pure ""
+renderOutput (Message m) = pure m
+renderOutput (Value i) = pure $ show i
 renderOutput PrintStack = gets displayState
 renderOutput PrintRegisters = ("REGISTERS:\n" ++) <$> gets present
+renderOutput (ShowError e) = renderError e
 
 renderError :: CalcError -> Computation String
 renderError _ = return ""

@@ -21,6 +21,9 @@ common common-flags
 
 library
   import: common-flags
+  ghc-options:
+    -Wall
+
   hs-source-dirs:
     src/
 

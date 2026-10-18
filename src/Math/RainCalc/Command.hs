@@ -5,7 +5,7 @@ module Math.RainCalc.Command (
 )
 where
 
-import Data.Functor (($>), (<&>))
+import Data.Functor ((<&>))
 import Math.RainCalc.Computation (
     Computation,
     clear,
