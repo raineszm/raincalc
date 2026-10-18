@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 
-module Math.RainCalc.RPNState
-  ( RPNState (..),
+module Math.RainCalc.RPNState (
+    RPNState (..),
     emptyState,
     smap,
     rmap,
@@ -12,18 +12,18 @@ module Math.RainCalc.RPNState
     push_,
     dup_,
     clear_,
-  )
+)
 where
 
 import Data.List (mapAccumL)
-import qualified Data.Map as Map
+import Data.Map qualified as Map
 
 data RPNState = RPNState
-  { stack_ :: [Double],
-    registers_ :: Map.Map Char Double,
-    modifier_ :: Maybe String,
-    terminate_ :: Bool
-  }
+    { stack_ :: [Double]
+    , registers_ :: Map.Map Char Double
+    , modifier_ :: Maybe String
+    , terminate_ :: Bool
+    }
 
 formatStack :: [Double] -> String
 formatStack [] = "(EMPTY)"
@@ -39,36 +39,36 @@ displayState = formatStack . stack_
 
 emptyState :: RPNState
 emptyState =
-  RPNState
-    { stack_ = [],
-      registers_ = Map.empty,
-      modifier_ = Nothing,
-      terminate_ = False
-    }
+    RPNState
+        { stack_ = []
+        , registers_ = Map.empty
+        , modifier_ = Nothing
+        , terminate_ = False
+        }
 
 stackSize :: RPNState -> Int
 stackSize = length . stack_
 
 smap :: ([Double] -> [Double]) -> RPNState -> RPNState
-smap f state' = state' {stack_ = f $ stack_ state'}
+smap f state' = state'{stack_ = f $ stack_ state'}
 
 rmap :: (Map.Map Char Double -> Map.Map Char Double) -> RPNState -> RPNState
-rmap f state' = state' {registers_ = f $ registers_ state'}
+rmap f state' = state'{registers_ = f $ registers_ state'}
 
 push_ :: Double -> RPNState -> RPNState
 push_ num = smap (num :)
 
 dup_ :: RPNState -> RPNState
 dup_ =
-  smap $ \case
-    [] -> []
-    stk@(x : _) -> x : stk
+    smap $ \case
+        [] -> []
+        stk@(x : _) -> x : stk
 
 swap_ :: RPNState -> RPNState
 swap_ =
-  smap $ \case
-    (x : y : xs) -> y : x : xs
-    xs -> xs
+    smap $ \case
+        (x : y : xs) -> y : x : xs
+        xs -> xs
 
 clear_ :: RPNState -> RPNState
 clear_ = smap (const [])

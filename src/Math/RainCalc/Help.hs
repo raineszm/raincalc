@@ -1,21 +1,16 @@
 module Math.RainCalc.Help where
 
+import Data.List (intercalate)
 import Data.Map.Strict qualified as Map
-import Math.RainCalc.Command (commands)
-import Math.RainCalc.Modifier (modifiers)
-import Math.RainCalc.Operator (operators)
 
-showActions :: String
-showActions = unlines outLines
+showActions :: [[String]] -> String
+showActions sections = unlines outLines
   where
     outLines =
         header
             : map
                 doWrap
-                [ Map.keys operators
-                , Map.keys commands
-                , Map.keys modifiers
-                ]
+                sections
     header = "Available Commands: "
     doWrap = wrapLine 60 . unwords
 
@@ -35,3 +30,13 @@ wrapLine' n (i, y, rest@(x : xs))
     | otherwise = (y, rest)
   where
     newlength = i + length x
+
+simpleHelp :: String -> Int -> String
+simpleHelp name (-1) = "[... ] -> [" ++ name ++ "(...)]"
+simpleHelp name 0 = "[... ] -> [... " ++ name ++ "]"
+simpleHelp name 1 = "[... x] -> [... " ++ name ++ "(x)]"
+simpleHelp name 2 = "[... x, y] -> [... x " ++ name ++ " y]"
+simpleHelp name arity =
+    "[... " ++ vars ++ "] -> [... " ++ name ++ "(" ++ vars ++ ")]"
+  where
+    vars = intercalate ", " $ map (('x' :) . show) [1 .. arity]

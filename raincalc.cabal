@@ -30,7 +30,7 @@ library
     regex-pcre-builtin ^>=0.95.2.3.8.44,
 
   exposed-modules:
-    Math.RainCalc.Actions
+    Math.RainCalc.Action
     Math.RainCalc.CalcError
     Math.RainCalc.Command
     Math.RainCalc.Computation
@@ -41,6 +41,7 @@ library
     Math.RainCalc.Operator
     Math.RainCalc.Output
     Math.RainCalc.Registers
+    Math.RainCalc.Registry
     Math.RainCalc.RPNState
     Math.RainCalc.Utils
 
@@ -65,9 +66,9 @@ test-suite spec
     -Wall
 
   build-depends:
+    containers ^>=0.8.1,
     hspec ^>=2.11.18,
     QuickCheck ^>=2.19.0.0,
-    containers ^>=0.8.1,
     raincalc,
 
   build-tool-depends: hspec-discover:hspec-discover >=2 && <3
