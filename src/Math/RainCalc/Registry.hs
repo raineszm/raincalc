@@ -1,7 +1,9 @@
+{-# LANGUAGE OverloadedRecordDot #-}
+
 module Math.RainCalc.Registry where
 
 import Data.Map.Strict qualified as Map
-import Math.RainCalc.Action (ActionEntry (..))
+import Math.RainCalc.Action (Action (..), ActionEntry (..))
 import Math.RainCalc.Command (commands)
 import Math.RainCalc.Modifier (modifiers)
 import Math.RainCalc.Operator (operators)
@@ -12,7 +14,7 @@ actions =
         <> fmap EOperator (Map.fromList $ expand operators)
         <> fmap EModifier (Map.fromList $ expand modifiers)
 
-expand :: [([String], a)] -> [(String, a)]
+expand :: [Action a] -> [(String, Action a)]
 expand = foldMap alias
   where
-    alias (names, x) = map (,x) names
+    alias x@Action{names} = map (,x) names

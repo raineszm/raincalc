@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedRecordDot #-}
+
 module Math.RainCalc.Operator (
     operators,
     evalOperator,
@@ -5,22 +7,27 @@ module Math.RainCalc.Operator (
 where
 
 import Control.Monad.State.Class (gets, modify)
-import Math.RainCalc.Action (Operator (..))
+import Math.RainCalc.Action (Action (..), OperatorSpec (..))
 import Math.RainCalc.CalcError (CalcError (..))
 import Math.RainCalc.Computation (Computation, pop, push)
 import Math.RainCalc.Output (Output (..), silent)
 import Math.RainCalc.RPNState (RPNState (..))
 
-binaryOperator :: (Double -> Double -> Double) -> Operator
-binaryOperator f = Operator{arity = 2, runOp = action}
+binary :: [String] -> (Double -> Double -> Double) -> Action OperatorSpec
+binary names f =
+    Action
+        { names
+        , actionSpec = OperatorSpec{arity = 2, runOp = action}
+        , desc = ""
+        }
   where
     action [x, y] = Right $ y `f` x
     action _ = Left $ StackUnderflow 2
 
-binaryOperators :: [([String], Operator)]
+binaryOperators :: [Action OperatorSpec]
 binaryOperators =
     map
-        (fmap binaryOperator)
+        (uncurry binary)
         [ (["+"], (+))
         , (["-"], (-))
         , (["/"], (/))
@@ -28,20 +35,25 @@ binaryOperators =
         , (["^", "**"], (**))
         ]
 
-buildOperator :: Int -> ([Double] -> Double) -> Operator
+buildOperator :: Int -> ([Double] -> Double) -> OperatorSpec
 buildOperator arity f =
-    Operator{arity = arity, runOp = Right . f}
+    OperatorSpec{arity = arity, runOp = Right . f}
 
-unaryOperator :: (Double -> Double) -> Operator
-unaryOperator f = Operator{arity = 1, runOp = action}
+unary :: [String] -> (Double -> Double) -> Action OperatorSpec
+unary names f =
+    Action
+        { names
+        , actionSpec = OperatorSpec{arity = 1, runOp = action}
+        , desc = ""
+        }
   where
     action [x] = Right $ f x
     action _ = Left $ StackUnderflow 1
 
-unaryOperators :: [([String], Operator)]
+unaryOperators :: [Action OperatorSpec]
 unaryOperators =
     map
-        (fmap unaryOperator)
+        (uncurry unary)
         [ (["sin", "s"], sin)
         , (["cos", "c"], cos)
         , (["tan", "t"], tan)
@@ -79,19 +91,35 @@ factorial n
     | n < 0 = 0 / 0
     | otherwise = fromIntegral $ product [1 .. (round n :: Integer)]
 
-foldOperators :: [([String], Operator)]
+foldOp :: [String] -> ([Double] -> Double) -> Action OperatorSpec
+foldOp names f =
+    Action
+        { names
+        , actionSpec = OperatorSpec{arity = -1, runOp = Right . f}
+        , desc = ""
+        }
+
+foldOperators :: [Action OperatorSpec]
 foldOperators =
-    map (fmap $ buildOperator (-1)) [(["sum"], sum), (["prod"], product)]
+    map (uncurry foldOp) [(["sum"], sum), (["prod"], product)]
 
-constants :: [([String], Operator)]
+constOp :: [String] -> Double -> Action OperatorSpec
+constOp names value =
+    Action
+        { names
+        , actionSpec = OperatorSpec{arity = -1, runOp = const $ Right value}
+        , desc = ""
+        }
+
+constants :: [Action OperatorSpec]
 constants =
-    map (fmap $ buildOperator 0) [(["e"], const (exp 1)), (["pi"], const pi)]
+    map (uncurry constOp) [(["e"], exp 1), (["pi"], pi)]
 
-operators :: [([String], Operator)]
+operators :: [Action OperatorSpec]
 operators =
     concat [constants, unaryOperators, binaryOperators, foldOperators]
 
-evalOperator :: Operator -> Computation Output
+evalOperator :: OperatorSpec -> Computation Output
 evalOperator op
     | arity' >= 0 = do
         args <- pop arity'
@@ -105,5 +133,5 @@ evalOperator op
                 r{stack_ = [result]}
             Left e -> pure $ ShowError e
   where
-    action = runOp op
-    arity' = arity op
+    action = op.runOp
+    arity' = op.arity

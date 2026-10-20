@@ -11,7 +11,7 @@ import Math.RainCalc.RPNState (RPNState)
 
 data SessionState = SessionState
     { rpn :: RPNState
-    , activeModifier :: Maybe Modifier
+    , activeModifier :: Maybe ModifierSpec
     }
 
 sessionState :: RPNState -> SessionState
@@ -24,18 +24,23 @@ zoomRPN comp = state $ \s ->
     let (a, r') = runState comp s.rpn
      in (a, s{rpn = r'})
 
-data Operator = Operator
+data OperatorSpec = OperatorSpec
     { arity :: Int
     , runOp :: [Double] -> Either CalcError Double
     }
 
-data Modifier = Modifier
+data ModifierSpec = ModifierSpec
     { runMod :: String -> Computation Output
     , runModSolo :: Computation Output
-    -- , help_ :: String
+    }
+
+data Action a = Action
+    { names :: [String]
+    , actionSpec :: a
+    , desc :: String
     }
 
 data ActionEntry
-    = ECommand (Computation Output)
-    | EOperator Operator
-    | EModifier Modifier
+    = ECommand (Action (Computation Output))
+    | EOperator (Action OperatorSpec)
+    | EModifier (Action ModifierSpec)

@@ -1,10 +1,12 @@
+{-# LANGUAGE OverloadedRecordDot #-}
+
 module Math.RainCalc.Engine where
 
 import Control.Monad ((>=>))
 import Control.Monad.State.Strict (runState)
 import Data.Char (toLower)
 import Data.Map.Strict qualified as Map
-import Math.RainCalc.Action (ActionEntry (..), Modifier (runMod), Session, SessionState (..), sessionState, zoomRPN)
+import Math.RainCalc.Action (Action (..), ActionEntry (..), ModifierSpec (..), Session, SessionState (..), sessionState, zoomRPN)
 import Math.RainCalc.CalcError (CalcError (MalformedInput))
 import Math.RainCalc.Modifier qualified as Mod
 import Math.RainCalc.Numbers qualified as N
@@ -65,16 +67,16 @@ processToken tok = do
     mod <- Mod.takeModifier
     case mod of
         Nothing -> processToken_ tok
-        Just mod' -> zoomRPN $ runMod mod' tok
+        Just mod' -> zoomRPN $ mod'.runMod tok
 
 processToken_ :: String -> Session Output
 processToken_ tok = do
     do
         let entry = Map.lookup tok actions
         case entry of
-            Just (ECommand cmd) -> zoomRPN cmd
-            Just (EOperator op) -> zoomRPN $ Op.evalOperator op
-            Just (EModifier mod) -> silent $ Mod.armModifier mod
+            Just (ECommand Action{actionSpec = cmd}) -> zoomRPN cmd
+            Just (EOperator Action{actionSpec = op}) -> zoomRPN $ Op.evalOperator op
+            Just (EModifier Action{actionSpec = mod}) -> silent $ Mod.armModifier mod
             Nothing ->
                 if N.isNumber tok
                     then silent . zoomRPN $ N.handleNumber tok

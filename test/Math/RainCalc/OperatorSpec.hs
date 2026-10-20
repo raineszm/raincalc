@@ -1,9 +1,11 @@
+{-# LANGUAGE OverloadedRecordDot #-}
+
 module Math.RainCalc.OperatorSpec (spec) where
 
 import Control.Applicative ()
 import Data.List (find)
 import Data.Maybe (fromJust)
-import Math.RainCalc.Action (Operator)
+import Math.RainCalc.Action (Action (..), OperatorSpec)
 import Math.RainCalc.Operator
 import Math.RainCalc.TestHelper
 import Test.Hspec
@@ -15,10 +17,10 @@ spec = describe "Operator" $ do
     argumentCountingSpec
     arithmeticSpec
 
-getOp :: String -> Operator
-getOp op = snd . fromJust $ find matches operators
+getOp :: String -> OperatorSpec
+getOp op = actionSpec . fromJust $ find matches operators
   where
-    matches (a, _) = elem op a
+    matches x = op `elem` x.names
 
 argumentCountingSpec :: Spec
 argumentCountingSpec =

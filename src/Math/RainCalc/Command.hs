@@ -6,6 +6,7 @@ module Math.RainCalc.Command (
 where
 
 import Data.Functor ((<&>))
+import Math.RainCalc.Action (Action (..))
 import Math.RainCalc.Computation (
     Computation,
     clear,
@@ -16,22 +17,46 @@ import Math.RainCalc.Computation (
  )
 import Math.RainCalc.Output (Output (..), silent)
 
--- "Pops and presents the top of the stack."
-popStack :: Computation Output
-popStack =
-    pop 1
-        <&> \case
-            [] -> Silent
-            [x] -> Value x
-            _ -> error "Pop 1 returned more than one value"
-
-commands :: [([String], Computation Output)]
+commands :: [Action (Computation Output)]
 commands =
-    [ ([".s"], pure PrintStack) -- "Prints the stack to the screen."
-    , (["."], popStack)
-    , ([".q", ".quit", "q", "quit"], silent terminate) --  "Quits the program."
-    , (["dup"], silent dup) -- , help_ = "[ ... x ] -> [ ... x, x ]"
-    , (["swap"], silent swap) -- help_ = "[ ... x, y ] -> [ ... y, x ]"
-    , (["clear"], silent clear) -- , help_ = "[ ... ] -> []"
-    , ([".r", ".reg", "registers"], pure PrintRegisters) -- "Prints the set registers to the screen."
+    [ Action
+        { names = [".s"]
+        , actionSpec = pure PrintStack
+        , desc = "Prints the stack to the screen."
+        }
+    , Action
+        { names = ["."]
+        , actionSpec =
+            pop 1
+                <&> \case
+                    [] -> Silent
+                    [x] -> Value x
+                    _ -> error "Pop 1 returned more than one value"
+        , desc = "Pops and presents the top of the stack."
+        }
+    , Action
+        { names = [".q", ".quit", "q", "quit"]
+        , actionSpec = silent terminate
+        , desc = "Quits the program."
+        }
+    , Action
+        { names = ["dup"]
+        , actionSpec = silent dup
+        , desc = "[ ... x ] -> [ ... x, x ]"
+        }
+    , Action
+        { names = ["swap"]
+        , actionSpec = silent swap
+        , desc = "[ ... x, y ] -> [ ... y, x ]"
+        }
+    , Action
+        { names = ["clear"]
+        , actionSpec = silent clear
+        , desc = "[ ... ] -> []"
+        }
+    , Action
+        { names = [".r", ".reg", "registers"]
+        , actionSpec = pure PrintRegisters
+        , desc = "Prints the set registers to the screen."
+        }
     ]

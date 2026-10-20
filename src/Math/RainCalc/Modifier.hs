@@ -1,4 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedRecordDot #-}
 
 module Math.RainCalc.Modifier (
     takeModifier,
@@ -15,7 +16,7 @@ import Data.Maybe (
     fromMaybe,
     isNothing,
  )
-import Math.RainCalc.Action (Modifier (..), Session, SessionState (..), zoomRPN)
+import Math.RainCalc.Action (Action (..), ModifierSpec (..), Session, SessionState (..), zoomRPN)
 import Math.RainCalc.CalcError (CalcError (..))
 import Math.RainCalc.Computation (Computation, pop, push)
 import Math.RainCalc.Output (Output (..), silent)
@@ -23,9 +24,9 @@ import Math.RainCalc.Registers qualified as Reg
 import Numeric (readHex)
 import Prelude hiding (mod)
 
-hex :: Modifier
+hex :: ModifierSpec
 hex =
-    Modifier
+    ModifierSpec
         { runMod = hexAction
         , runModSolo = return . ShowError $ MalformedInput "x:"
         -- , help_ = "Read next input as a hex sequence."
@@ -40,9 +41,9 @@ hexAction tok =
     ((num, rest) : _) = readHex digits
     digits = fromMaybe tok $ stripPrefix "0x" tok
 
-toRegister :: Modifier
+toRegister :: ModifierSpec
 toRegister =
-    Modifier
+    ModifierSpec
         { runMod = toRegisterAction
         , runModSolo = soloRegisterAction
         -- , help_ = "Pops the top of the stack to the specified register."
@@ -60,9 +61,9 @@ toRegisterAction [c]
     | otherwise = pure . ShowError $ InvalidRegister [c]
 toRegisterAction s = pure . ShowError $ InvalidRegister s
 
-fromRegister :: Modifier
+fromRegister :: ModifierSpec
 fromRegister =
-    Modifier
+    ModifierSpec
         { runMod = fromRegisterAction
         , runModSolo = soloRegisterAction
         -- , help_ = "Pushes the value of the specified register to the stack."
@@ -78,21 +79,21 @@ fromRegisterAction [c]
     | otherwise = return . ShowError $ InvalidRegister [c]
 fromRegisterAction s = return . ShowError $ InvalidRegister s
 
-modifiers :: [([String], Modifier)]
+modifiers :: [Action ModifierSpec]
 modifiers =
     [ -- (["?", ".?", ".h", ".help"], help),
-      (["x:"], hex)
-    , (["->"], toRegister)
-    , (["<-"], fromRegister)
+      Action{names = ["x:"], actionSpec = hex, desc = ""}
+    , Action{names = ["->"], actionSpec = toRegister, desc = ""}
+    , Action{names = ["<-"], actionSpec = fromRegister, desc = ""}
     ]
 
-armModifier :: Modifier -> Session ()
+armModifier :: ModifierSpec -> Session ()
 armModifier mod = modify $ \state -> state{activeModifier = Just mod}
 
 disarmModifier :: Session ()
 disarmModifier = modify $ \state -> state{activeModifier = Nothing}
 
-takeModifier :: Session (Maybe Modifier)
+takeModifier :: Session (Maybe ModifierSpec)
 takeModifier = gets activeModifier <* disarmModifier
 
 cleanupModifiers :: Session Output
@@ -100,4 +101,4 @@ cleanupModifiers = do
     mod <- takeModifier
     case mod of
         Nothing -> pure Silent
-        Just mod' -> zoomRPN $ runModSolo mod'
+        Just mod' -> zoomRPN mod'.runModSolo
