@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedRecordDot #-}
-
 module Math.RainCalc.Registry where
 
 import Data.Map.Strict qualified as Map

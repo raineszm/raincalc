@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedRecordDot #-}
-
 module Math.RainCalc.Engine where
 
 import Control.Monad ((>=>))

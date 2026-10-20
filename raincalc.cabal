@@ -15,6 +15,9 @@ source-repository head
 
 common common-flags
   default-language: GHC2024
+  default-extensions:
+    OverloadedRecordDot
+
   build-depends:
     base ==4.*,
     mtl ^>=2.3.2,

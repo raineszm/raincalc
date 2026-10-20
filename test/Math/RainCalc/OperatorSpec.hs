@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedRecordDot #-}
-
 module Math.RainCalc.OperatorSpec (spec) where
 
 import Control.Applicative ()

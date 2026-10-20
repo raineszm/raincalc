@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedRecordDot #-}
-
 module Math.RainCalc.Action where
 
 import Control.Monad.State.Class (state)

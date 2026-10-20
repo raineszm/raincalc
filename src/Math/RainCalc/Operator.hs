@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedRecordDot #-}
-
 module Math.RainCalc.Operator (
     operators,
     evalOperator,
