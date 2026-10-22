@@ -5,19 +5,22 @@ module Math.RainCalc.Modifier (
     cleanupModifiers,
     armModifier,
     modifiers,
+    helpSpec,
 )
 where
 
 import Control.Monad.State.Class (gets, modify)
 import Data.List (stripPrefix)
+import Data.Map.Strict qualified as Map
 import Data.Maybe (
     fromJust,
     fromMaybe,
     isNothing,
  )
-import Math.RainCalc.Action (Action (..), ModifierSpec (..), Session, SessionState (..), zoomRPN)
+import Math.RainCalc.Action (Action (..), ActionEntry, ModifierSpec (..), Session, SessionState (..), actionDesc, zoomRPN)
 import Math.RainCalc.CalcError (CalcError (..))
 import Math.RainCalc.Computation (Computation, pop, push)
+import Math.RainCalc.Help (showActions)
 import Math.RainCalc.Output (Output (..), silent)
 import Math.RainCalc.Registers qualified as Reg
 import Numeric (readHex)
@@ -80,11 +83,29 @@ fromRegisterAction s = return . ShowError $ InvalidRegister s
 
 modifiers :: [Action ModifierSpec]
 modifiers =
-    [ -- (["?", ".?", ".h", ".help"], help),
-      Action{names = ["x:"], actionSpec = hex, desc = ""}
+    [ Action{names = ["x:"], actionSpec = hex, desc = ""}
     , Action{names = ["->"], actionSpec = toRegister, desc = ""}
     , Action{names = ["<-"], actionSpec = fromRegister, desc = ""}
     ]
+
+helpSpec :: Map.Map String ActionEntry -> ModifierSpec
+helpSpec actions =
+    ModifierSpec
+        { runMod = helpAction
+        , runModSolo = soloHelpAction
+        }
+  where
+    helpAction :: String -> Computation Output
+    helpAction tok = do
+        case Map.lookup tok actions of
+            Just entry -> pure . Message $ actionDesc entry
+            Nothing -> pure . Message $ "No such entry"
+    soloHelpAction :: Computation Output
+    soloHelpAction = do
+        pure . Message $
+            showActions
+                [ Map.keys actions
+                ]
 
 armModifier :: ModifierSpec -> Session ()
 armModifier mod = modify $ \state -> state{activeModifier = Just mod}

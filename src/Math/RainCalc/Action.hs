@@ -42,3 +42,8 @@ data ActionEntry
     = ECommand (Action (Computation Output))
     | EOperator (Action OperatorSpec)
     | EModifier (Action ModifierSpec)
+
+actionDesc :: ActionEntry -> String
+actionDesc (ECommand x) = x.desc
+actionDesc (EOperator x) = x.desc
+actionDesc (EModifier x) = x.desc
