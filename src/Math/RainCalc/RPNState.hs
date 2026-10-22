@@ -21,7 +21,6 @@ import Data.Map qualified as Map
 data RPNState = RPNState
     { stack_ :: [Double]
     , registers_ :: Map.Map Char Double
-    , modifier_ :: Maybe String
     , terminate_ :: Bool
     }
 
@@ -42,7 +41,6 @@ emptyState =
     RPNState
         { stack_ = []
         , registers_ = Map.empty
-        , modifier_ = Nothing
         , terminate_ = False
         }
 
