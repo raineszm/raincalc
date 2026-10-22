@@ -31,7 +31,6 @@ hex =
     ModifierSpec
         { runMod = hexAction
         , runModSolo = return . ShowError $ MalformedInput "x:"
-        -- , help_ = "Read next input as a hex sequence."
         }
 
 hexAction :: String -> Computation Output
@@ -48,7 +47,6 @@ toRegister =
     ModifierSpec
         { runMod = toRegisterAction
         , runModSolo = soloRegisterAction
-        -- , help_ = "Pops the top of the stack to the specified register."
         }
 
 soloRegisterAction :: Computation Output
@@ -68,7 +66,6 @@ fromRegister =
     ModifierSpec
         { runMod = fromRegisterAction
         , runModSolo = soloRegisterAction
-        -- , help_ = "Pushes the value of the specified register to the stack."
         }
 
 fromRegisterAction :: String -> Computation Output
@@ -83,9 +80,17 @@ fromRegisterAction s = return . ShowError $ InvalidRegister s
 
 modifiers :: [Action ModifierSpec]
 modifiers =
-    [ Action{names = ["x:"], actionSpec = hex, desc = ""}
-    , Action{names = ["->"], actionSpec = toRegister, desc = ""}
-    , Action{names = ["<-"], actionSpec = fromRegister, desc = ""}
+    [ Action{names = ["x:"], actionSpec = hex, desc = "Read next input as a hex sequence."}
+    , Action
+        { names = ["->"]
+        , actionSpec = toRegister
+        , desc = "Pops the top of the stack to the specified register."
+        }
+    , Action
+        { names = ["<-"]
+        , actionSpec = fromRegister
+        , desc = "Pushes the value of the specified register to the stack."
+        }
     ]
 
 helpSpec :: Map.Map String ActionEntry -> ModifierSpec

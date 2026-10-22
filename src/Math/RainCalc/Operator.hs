@@ -8,6 +8,7 @@ import Control.Monad.State.Class (gets, modify)
 import Math.RainCalc.Action (Action (..), OperatorSpec (..))
 import Math.RainCalc.CalcError (CalcError (..))
 import Math.RainCalc.Computation (Computation, pop, push)
+import Math.RainCalc.Help (simpleHelp)
 import Math.RainCalc.Output (Output (..), silent)
 import Math.RainCalc.RPNState (RPNState (..))
 
@@ -16,7 +17,7 @@ binary names f =
     Action
         { names
         , actionSpec = OperatorSpec{arity = 2, runOp = action}
-        , desc = ""
+        , desc = simpleHelp (head names) 2
         }
   where
     action [x, y] = Right $ y `f` x
@@ -33,16 +34,12 @@ binaryOperators =
         , (["^", "**"], (**))
         ]
 
-buildOperator :: Int -> ([Double] -> Double) -> OperatorSpec
-buildOperator arity f =
-    OperatorSpec{arity = arity, runOp = Right . f}
-
 unary :: [String] -> (Double -> Double) -> Action OperatorSpec
 unary names f =
     Action
         { names
         , actionSpec = OperatorSpec{arity = 1, runOp = action}
-        , desc = ""
+        , desc = simpleHelp (head names) 1
         }
   where
     action [x] = Right $ f x
@@ -94,7 +91,7 @@ foldOp names f =
     Action
         { names
         , actionSpec = OperatorSpec{arity = -1, runOp = Right . f}
-        , desc = ""
+        , desc = simpleHelp (head names) (-1)
         }
 
 foldOperators :: [Action OperatorSpec]
@@ -105,8 +102,8 @@ constOp :: [String] -> Double -> Action OperatorSpec
 constOp names value =
     Action
         { names
-        , actionSpec = OperatorSpec{arity = -1, runOp = const $ Right value}
-        , desc = ""
+        , actionSpec = OperatorSpec{arity = 0, runOp = const $ Right value}
+        , desc = simpleHelp (head names) 0
         }
 
 constants :: [Action OperatorSpec]

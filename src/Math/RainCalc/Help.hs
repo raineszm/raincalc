@@ -8,10 +8,9 @@ showActions sections = unlines outLines
     outLines =
         header
             : map
-                doWrap
+                (wrapLine 60 . unwords)
                 sections
     header = "Available Commands: "
-    doWrap = wrapLine 60 . unwords
 
 wrapLine :: Int -> String -> String
 wrapLine n text = doWrap n ("", words text)
