@@ -13,9 +13,7 @@ import Control.Monad.State.Class (gets, modify)
 import Data.List (stripPrefix)
 import Data.Map.Strict qualified as Map
 import Data.Maybe (
-    fromJust,
     fromMaybe,
-    isNothing,
  )
 import Math.RainCalc.Action (Action (..), ActionEntry, ModifierSpec (..), Session, SessionState (..), actionDesc, zoomRPN)
 import Math.RainCalc.CalcError (CalcError (..))
@@ -49,17 +47,20 @@ toRegister =
         , runModSolo = soloRegisterAction
         }
 
+registerAction :: (Char -> Computation Output) -> String -> Computation Output
+registerAction go [c]
+    | Reg.isValid c = go c
+    | otherwise = pure . ShowError $ InvalidRegister [c]
+registerAction _ s = pure . ShowError $ InvalidRegister s
+
 soloRegisterAction :: Computation Output
 soloRegisterAction = return $ Message "No register supplied."
 
 toRegisterAction :: String -> Computation Output
-toRegisterAction [c]
-    | Reg.isValid c =
-        pop 1 >>= \case
-            [x] -> silent $ Reg.setR c x
-            _ -> pure . ShowError $ EmptyStack
-    | otherwise = pure . ShowError $ InvalidRegister [c]
-toRegisterAction s = pure . ShowError $ InvalidRegister s
+toRegisterAction = registerAction $ \c -> do
+    pop 1 >>= \case
+        [x] -> silent $ Reg.setR c x
+        _ -> pure . ShowError $ EmptyStack
 
 fromRegister :: ModifierSpec
 fromRegister =
@@ -69,14 +70,26 @@ fromRegister =
         }
 
 fromRegisterAction :: String -> Computation Output
-fromRegisterAction [c]
-    | Reg.isValid c = do
+fromRegisterAction = registerAction $ \c -> do
+    fetched <- Reg.getR c
+    maybe
+        (pure $ Message ("Tried to fetch unset register " ++ [c]))
+        (silent . push)
+        fetched
+
+registersSpec :: ModifierSpec
+registersSpec =
+    ModifierSpec
+        { runMod = runMod
+        , runModSolo = pure PrintRegisters
+        }
+  where
+    runMod = registerAction $ \c -> do
         fetched <- Reg.getR c
-        if isNothing fetched
-            then return $ Message ("Tried to fetch unset register " ++ [c])
-            else push (fromJust fetched) >> return Silent
-    | otherwise = return . ShowError $ InvalidRegister [c]
-fromRegisterAction s = return . ShowError $ InvalidRegister s
+        pure . Message $
+            c
+                : ' '
+                : maybe " unset" show fetched
 
 modifiers :: [Action ModifierSpec]
 modifiers =
@@ -90,6 +103,11 @@ modifiers =
         { names = ["<-"]
         , actionSpec = fromRegister
         , desc = "Pushes the value of the specified register to the stack."
+        }
+    , Action
+        { names = [".r", ".reg", "registers"]
+        , actionSpec = registersSpec
+        , desc = "Prints the set registers to the screen."
         }
     ]
 

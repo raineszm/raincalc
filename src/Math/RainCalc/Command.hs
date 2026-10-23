@@ -54,9 +54,4 @@ commands =
         , actionSpec = silent clear
         , desc = "[ ... ] -> []"
         }
-    , Action
-        { names = [".r", ".reg", "registers"]
-        , actionSpec = pure PrintRegisters
-        , desc = "Prints the set registers to the screen."
-        }
     ]
